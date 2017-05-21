@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.jakewharton.butterknife'
+apply plugin: 'org.greenrobot.greendao'
 
 android {
     compileSdkVersion 25
@@ -20,14 +21,29 @@ android {
     }
 }
 
+greendao {
+    schemaVersion 1
+    daoPackage 'com.miaxis.face.greendao.gen'
+    targetGenDir 'src/main/java'
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    compile files('src/main/libs/AMap_Location_V3.3.0_20170118.jar')
+    compile files('src/main/libs/AMap_Search_V4.0.0_20170111.jar')
+    compile files('src/main/libs/classes.jar')
+    compile files('src/main/libs/commons-codec-1.6.jar')
+    compile files('src/main/libs/MXFingerDriver.jar')
+    compile files('src/main/libs/smdt.jar')
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.jakewharton:butterknife:8.5.1'
+    compile 'org.greenrobot:greendao:3.2.2'
+    compile 'org.greenrobot:greendao-generator:3.2.2'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    compile 'org.greenrobot:eventbus:3.0.0'
 }

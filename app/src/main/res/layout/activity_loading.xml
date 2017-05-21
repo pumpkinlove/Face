@@ -24,23 +24,26 @@
         <com.miaxis.face.view.custom.GifView
             android:id="@+id/gif_loading"
             android:layout_gravity="center"
-            android:layout_width="300dp"
-            android:layout_height="match_parent"/>
-
-        <TextView
-            android:visibility="gone"
-            android:id="@+id/tv_loading"
-            android:text="正在加载...."
-            android:layout_gravity="center_vertical"
-            android:layout_width="300dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
     </LinearLayout>
 
 
-    <View
+    <LinearLayout
+        android:gravity="center_horizontal"
         android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="0dp"/>
+        android:layout_height="0dp">
+
+        <TextView
+            android:id="@+id/tv_loading"
+            android:text="正在初始化算法"
+            android:textSize="24sp"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
 
 </LinearLayout>
