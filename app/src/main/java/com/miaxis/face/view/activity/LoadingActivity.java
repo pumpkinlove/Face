@@ -6,6 +6,8 @@ import android.widget.TextView;
 
 import com.miaxis.face.R;
 import com.miaxis.face.event.InitCWEvent;
+import com.miaxis.face.event.ReInitEvent;
+import com.miaxis.face.util.LogUtil;
 import com.miaxis.face.view.custom.GifView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -40,16 +42,23 @@ public class LoadingActivity extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onInitCWEvent(InitCWEvent e) {
         switch (e.getResult()) {
-            case InitCWEvent.ERR_INIT:
-                tvLoading.setText("初始化算法失败");
+            case InitCWEvent.ERR_FILE_COMPARE:
+                tvLoading.setText("文件校验失败");
+                LogUtil.writeLog("文件校验失败");
+                eventBus.post(new ReInitEvent());
                 break;
             case InitCWEvent.ERR_LICENCE:
                 tvLoading.setText("读取授权文件失败");
+                LogUtil.writeLog("读取授权文件失败");
                 break;
             case InitCWEvent.INIT_SUCCESS:
                 tvLoading.setText("初始化算法成功");
+                LogUtil.writeLog("初始化算法成功");
                 startActivity(new Intent(this, MainActivity.class));
                 break;
+            default:
+                tvLoading.setText("初始化算法失败");
+                LogUtil.writeLog("初始化算法失败" + e.getResult());
         }
     }
 

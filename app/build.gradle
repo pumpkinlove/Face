@@ -34,7 +34,6 @@ dependencies {
     })
     compile files('src/main/libs/AMap_Location_V3.3.0_20170118.jar')
     compile files('src/main/libs/AMap_Search_V4.0.0_20170111.jar')
-    compile files('src/main/libs/classes.jar')
     compile files('src/main/libs/commons-codec-1.6.jar')
     compile files('src/main/libs/MXFingerDriver.jar')
     compile files('src/main/libs/smdt.jar')

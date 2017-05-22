@@ -187,38 +187,6 @@ public class MXFaceAPI {
 				return -1;
 			sModelPath = new StringBuilder(strSDPath).append(File.separator).append(MXConStant.strModelDir).append(File.separator).append(MXConStant.strConfigXML).toString();
 		}
-//        else
-//        {
-//   	        // 识别模型路径，建议拷贝到手机外部存储中
-//	        if(szConfigFile!=null)
-//	        {
-//	        	sModelPath = new StringBuilder(szConfigFile).append(File.separator).append(MXConStant.strConfigXML).toString(); 
-//	        	Log.e("MIAXIS", "sModelPath="+sModelPath);
-//	        }
-//	        if(ToolUnit.isExist(sModelPath)==false)
-//	        {
-//		        String strSDPath = ToolUnit.getSDCardPath();
-//		        if(strSDPath == null)
-//		        	return -1;
-//		        sModelPath = new StringBuilder(strSDPath).append(File.separator).append(MXConStant.strModelDir).append(File.separator).append(MXConStant.strConfigXML).toString(); 
-//		        String strDstPath = null;
-//		        Log.e("MIAXIS", "sModelPath="+sModelPath);
-//		        if(ToolUnit.isExist(sModelPath)==false)
-//		        {
-//		        	strDstPath = new StringBuilder(strSDPath).append(File.separator).append(MXConStant.strModelDir).toString(); 
-//		        	ToolUnit.AddDirectory(strDstPath);
-//		        	Log.e("MIAXIS", "strDstPath="+strDstPath);
-//		        	CopyConfigFile(strDstPath,MXConStant.strConfigXML);
-//		        	CopyConfigFile(strDstPath,MXConStant.strFeatureBin);
-//		        	CopyConfigFile(strDstPath,MXConStant.strFeatureWeightBin);
-//		        	CopyConfigFile(strDstPath,MXConStant.strMdlBin);
-//		        }  
-//		        if(ToolUnit.isExist(sModelPath)==false)
-//		        {
-//		        	return -2;
-//		        }
-//	        }
-//        }
         //Hash校验
         nRet = HashCheck();
         if(nRet != 0)

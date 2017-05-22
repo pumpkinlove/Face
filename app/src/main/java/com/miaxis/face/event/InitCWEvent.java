@@ -6,9 +6,9 @@ package com.miaxis.face.event;
 
 public class InitCWEvent {
 
-    public static final int ERR_LICENCE = -2009;
-    public static final int ERR_INIT    = -2;
-    public static final int INIT_SUCCESS = 0;
+    public static final int ERR_LICENCE         = -2009;
+    public static final int ERR_FILE_COMPARE    = -101;
+    public static final int INIT_SUCCESS        = 0;
 
     private int result;
 

@@ -3,6 +3,14 @@ package com.miaxis.face.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.provider.Settings;
+import android.util.Log;
+
+import com.miaxis.face.app.Face_App;
+import com.miaxis.face.constant.Constants;
+
+import org.zz.faceapi.MXFaceAPI;
+import org.zz.faceapi.MXFaceInfo;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -12,46 +20,23 @@ import android.content.Context;
  * helper methods.
  */
 public class FaceFeatureService extends IntentService {
-    // TODO: Rename actions, choose action names that describe tasks that this
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_FOO = "com.miaxis.face.service.action.FOO";
-    private static final String ACTION_BAZ = "com.miaxis.face.service.action.BAZ";
+    private static final String ACTION_FEATURE = "com.miaxis.face.service.action.feature";
 
-    // TODO: Rename parameters
-    private static final String EXTRA_PARAM1 = "com.miaxis.face.service.extra.PARAM1";
-    private static final String EXTRA_PARAM2 = "com.miaxis.face.service.extra.PARAM2";
+    private static final String CAMERA_DATA = "com.miaxis.face.service.extra.CAMERA_DATA";
+    private static final String FACE_NUM = "com.miaxis.face.service.extra.FACE_NUM";
+    private static final String FACE_BUFFER = "com.miaxis.face.service.extra.FACE_BUFFER";
 
     public FaceFeatureService() {
         super("FaceFeatureService");
     }
+    private MXFaceAPI mxFaceApi = Face_App.getMxAPI();
 
-    /**
-     * Starts this service to perform action Foo with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionFoo(Context context, String param1, String param2) {
+    public static void startExtractFeature(Context context, byte[] cameraData, int[] faceNum, MXFaceInfo[] pFaceBuffer) {
         Intent intent = new Intent(context, FaceFeatureService.class);
-        intent.setAction(ACTION_FOO);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
-        context.startService(intent);
-    }
-
-    /**
-     * Starts this service to perform action Baz with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionBaz(Context context, String param1, String param2) {
-        Intent intent = new Intent(context, FaceFeatureService.class);
-        intent.setAction(ACTION_BAZ);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
+        intent.setAction(ACTION_FEATURE);
+        intent.putExtra(CAMERA_DATA, cameraData);
+        intent.putExtra(FACE_NUM, faceNum);
+        intent.putExtra(FACE_BUFFER, pFaceBuffer);
         context.startService(intent);
     }
 
@@ -59,33 +44,21 @@ public class FaceFeatureService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_FOO.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleActionFoo(param1, param2);
-            } else if (ACTION_BAZ.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleActionBaz(param1, param2);
+            if (ACTION_FEATURE.equals(action)) {
+                final byte[] cameraData = intent.getByteArrayExtra(CAMERA_DATA);
+                final int[] faceNum = intent.getIntArrayExtra(FACE_NUM);
+                final MXFaceInfo[] pFaceBuffer = (MXFaceInfo[]) intent.getParcelableArrayExtra(FACE_NUM);
+                extractFeature(cameraData, faceNum, pFaceBuffer);
             }
         }
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
-    private void handleActionFoo(String param1, String param2) {
-        // TODO: Handle action Foo
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void extractFeature(byte[] cameraData, int[] faceNum, MXFaceInfo[] pFaceBuffer) {
+        byte[] pFeatureBuf = new byte[mxFaceApi.mxGetFeatureSize()];
+        long s1 = System.currentTimeMillis();
+        int re = mxFaceApi.mxFeatureExtractYUV(cameraData, Constants.PRE_WIDTH, Constants.PRE_HEIGHT, pFaceBuffer[0], pFeatureBuf);
+        long s2 = System.currentTimeMillis();
+        Log.e("mxFeatureExtractYUV", ""+re + "耗时: " + (s2 - s1));
     }
 
-    /**
-     * Handle action Baz in the provided background thread with the provided
-     * parameters.
-     */
-    private void handleActionBaz(String param1, String param2) {
-        // TODO: Handle action Baz
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
 }

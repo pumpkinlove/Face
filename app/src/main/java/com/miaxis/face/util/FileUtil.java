@@ -1,6 +1,7 @@
 package com.miaxis.face.util;
 
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -64,5 +65,20 @@ public class FileUtil {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void delDirectory(File file) {
+        File[] files = file.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isFile()){
+                File photoFile = new File(files[i].getPath());
+                if (photoFile.isDirectory()) {
+                    delDirectory(photoFile);
+                } else {
+                    photoFile.delete();
+                }
+            }
+        }
+        file.delete();
     }
 }

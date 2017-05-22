@@ -1,8 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:background="@drawable/result_bg"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tv_result"
+        android:layout_margin="16dp"
+        android:text="@string/result_failure"
+        android:textColor="@color/white"
+        android:textSize="60sp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.miaxis.face.view.custom.GifView
+        android:id="@+id/gif_finger"
+        android:layout_margin="16dp"
+        android:layout_gravity="center"
+        android:layout_width="110dp"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_weight="4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:text="抓拍人脸"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="45dp" />
+
+            <ImageView
+                android:background="@color/white"
+                android:layout_margin="15dp"
+                android:scaleType="fitCenter"
+                android:id="@+id/iv_camera_photo"
+                android:layout_width="111dp"
+                android:layout_height="150dp" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:minWidth="50dp"
+            android:id="@+id/iv_result"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_weight="4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:text="证件照片"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="45dp" />
+
+            <ImageView
+                android:background="@color/white"
+                android:scaleType="fitCenter"
+                android:layout_margin="15dp"
+                android:id="@+id/iv_id_photo"
+                android:layout_width="111dp"
+                android:layout_height="150dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 
 

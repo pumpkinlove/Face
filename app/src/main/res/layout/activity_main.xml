@@ -26,4 +26,11 @@
 
     </FrameLayout>
 
+    <com.miaxis.face.view.custom.ResultLayout
+        android:id="@+id/rv_result"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
 </RelativeLayout>

@@ -1,6 +1,9 @@
 package cn.cloudwalk.sdk;
 
-public class FaceInfo {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class FaceInfo implements Parcelable {
 	public FaceInfo()
 	{
 
@@ -56,4 +59,96 @@ public class FaceInfo {
 	public float yaw;           // 左右转头
 	public float roll;          // 平面内偏头
 
+	protected FaceInfo(Parcel in) {
+		detected = in.readInt();
+		trackId = in.readInt();
+		x = in.readInt();
+		y = in.readInt();
+		width = in.readInt();
+		height = in.readInt();
+		keypt_x = in.createFloatArray();
+		keypt_y = in.createFloatArray();
+		keyptScore = in.readFloat();
+		alignedData = in.createByteArray();
+		alignedW = in.readInt();
+		alignedH = in.readInt();
+		nChannels = in.readInt();
+		livenessErrcode = in.readInt();
+		headPitch = in.readInt();
+		headYaw = in.readInt();
+		mouthAct = in.readInt();
+		eyeAct = in.readInt();
+		attack = in.readInt();
+		errcode = in.readInt();
+		faceScore = in.readFloat();
+		brightness = in.readFloat();
+		clearness = in.readFloat();
+		symmetry = in.readFloat();
+		glassness = in.readFloat();
+		skiness = in.readFloat();
+		mouthness = in.readFloat();
+		eyeLeft = in.readFloat();
+		eyeRight = in.readFloat();
+		occlusion = in.readFloat();
+		pitch = in.readFloat();
+		yaw = in.readFloat();
+		roll = in.readFloat();
+	}
+
+	public static final Creator<FaceInfo> CREATOR = new Creator<FaceInfo>() {
+		@Override
+		public FaceInfo createFromParcel(Parcel in) {
+			return new FaceInfo(in);
+		}
+
+		@Override
+		public FaceInfo[] newArray(int size) {
+			return new FaceInfo[size];
+		}
+	};
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(detected);
+		dest.writeInt(trackId);
+		dest.writeInt(x);
+		dest.writeInt(y);
+		dest.writeInt(width);
+		dest.writeInt(height);
+		dest.writeFloatArray(keypt_x);
+		dest.writeFloatArray(keypt_y);
+		dest.writeFloat(keyptScore);
+		dest.writeByteArray(alignedData);
+
+		dest.writeInt(alignedW);
+		dest.writeInt(alignedH);
+		dest.writeInt(nChannels);
+		dest.writeInt(livenessErrcode);
+		dest.writeInt(headPitch);
+		dest.writeInt(headYaw);
+		dest.writeInt(mouthAct);
+		dest.writeInt(eyeAct);
+		dest.writeInt(attack);
+		dest.writeInt(errcode);
+
+		dest.writeFloat(faceScore);
+		dest.writeFloat(brightness);
+		dest.writeFloat(clearness);
+		dest.writeFloat(symmetry);
+		dest.writeFloat(glassness);
+		dest.writeFloat(skiness);
+		dest.writeFloat(mouthness);
+		dest.writeFloat(eyeLeft);
+		dest.writeFloat(eyeRight);
+		dest.writeFloat(occlusion);
+		dest.writeFloat(pitch);
+		dest.writeFloat(yaw);
+		dest.writeFloat(roll);
+
+	}
 }
