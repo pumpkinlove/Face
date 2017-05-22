@@ -1,5 +1,6 @@
 package com.miaxis.face.view.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -17,14 +18,10 @@ import butterknife.ButterKnife;
 
 public class LoadingActivity extends BaseActivity {
 
-    @BindView(R.id.tv_loading)
-    TextView tvLoading;
+    @BindView(R.id.tv_loading)  TextView tvLoading;
+    @BindView(R.id.gif_loading) GifView gifLoading;
 
-    @BindView(R.id.gif_loading)
-    GifView gifLoading;
-
-    @BindColor(R.color.white)
-    int white;
+    @BindColor(R.color.white)   int white;
 
     private EventBus eventBus;
 
@@ -32,6 +29,7 @@ public class LoadingActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
+        initWindow();
         ButterKnife.bind(this);
 
         gifLoading.setMovieResource(R.raw.loading);
@@ -50,6 +48,7 @@ public class LoadingActivity extends BaseActivity {
                 break;
             case InitCWEvent.INIT_SUCCESS:
                 tvLoading.setText("初始化算法成功");
+                startActivity(new Intent(this, MainActivity.class));
                 break;
         }
     }

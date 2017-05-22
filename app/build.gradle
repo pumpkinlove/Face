@@ -43,7 +43,7 @@ dependencies {
     compile 'com.jakewharton:butterknife:8.5.1'
     compile 'org.greenrobot:greendao:3.2.2'
     compile 'org.greenrobot:greendao-generator:3.2.2'
+    compile 'org.greenrobot:eventbus:3.0.0'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
-    compile 'org.greenrobot:eventbus:3.0.0'
 }

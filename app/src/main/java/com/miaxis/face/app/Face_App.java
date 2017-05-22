@@ -31,6 +31,7 @@ public class Face_App extends Application {
 
         initData();
         initCW();
+        smdtManager.smdtSetExtrnalGpioValue(2, true);
     }
 
     void initData() {
@@ -67,5 +68,9 @@ public class Face_App extends Application {
     public void onTerminate() {
         super.onTerminate();
         mxAPI.mxFreeAlg();
+    }
+
+    public static MXFaceAPI getMxAPI() {
+        return mxAPI;
     }
 }

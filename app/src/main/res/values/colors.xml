@@ -9,4 +9,8 @@
     <color name="gray_dark">#969696</color>
     <color name="gray_light">#bababa</color>
     <color name="dark">#333</color>
+    <color name="black">#000</color>
+    <color name="black_aero">#a8000000</color>
+    <color name="qing">#00ba96</color>
+    <color name="qing_aero">#41d7fff7</color>
 </resources>
