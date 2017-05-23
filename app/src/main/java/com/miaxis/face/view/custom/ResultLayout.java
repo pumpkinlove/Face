@@ -1,15 +1,18 @@
 package com.miaxis.face.view.custom;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.Base64;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.miaxis.face.R;
+import com.miaxis.face.bean.Record;
 import com.miaxis.face.event.ResultEvent;
 
 import org.greenrobot.eventbus.EventBus;
@@ -68,10 +71,28 @@ public class ResultLayout extends LinearLayout {
 
         eventBus = EventBus.getDefault();
         eventBus.register(this);
+        setVisibility(INVISIBLE);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onResultEvent(ResultEvent e) {
+        Record record = e.getRecord();
+        switch (e.getResult()) {
+            case ResultEvent.FACE_SUCCESS:
+                break;
+            case ResultEvent.FACE_FAIL_HAS_FINGER:
+                break;
+            case ResultEvent.FINGER_SUCCESS:
+                break;
+            case ResultEvent.FAIL:
+                break;
+            case ResultEvent.ID_PHOTO:
+                setVisibility(VISIBLE);
+                byte[] bmpData = Base64.decode(record.getCardImg(), Base64.DEFAULT);
+                Bitmap bmp = BitmapFactory.decodeByteArray(bmpData, 0, bmpData.length);
+                ivIdPhoto.setImageBitmap(bmp);
+                break;
+        }
     }
 
 }

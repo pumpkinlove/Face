@@ -60,15 +60,8 @@
         <activity android:name=".view.activity.SettingActivity" />
         <activity android:name=".view.activity.MainActivity" />
 
-        <service
-            android:name=".service.FaceFeatureService"
-            android:exported="false" />
-
         <activity android:name=".view.activity.TestActivity" />
 
-        <service
-            android:name=".service.ReadIdService"
-            android:exported="false"></service>
     </application>
 
 </manifest>

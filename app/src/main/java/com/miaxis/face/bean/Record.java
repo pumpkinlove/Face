@@ -30,13 +30,14 @@ public class Record {
     private String createDate;
     private String devsn;
     private String cardId;
+    private boolean hasUp;
 
-    @Generated(hash = 1891823664)
+    @Generated(hash = 1506650803)
     public Record(Long id, String name, String cardNo, String sex, String birthday,
             String address, String busEntity, String status, String cardImg,
             String faceImg, String finger0, String finger1, String printFinger,
             String location, String longitude, String latitude, String createDate,
-            String devsn, String cardId) {
+            String devsn, String cardId, boolean hasUp) {
         this.id = id;
         this.name = name;
         this.cardNo = cardNo;
@@ -56,6 +57,7 @@ public class Record {
         this.createDate = createDate;
         this.devsn = devsn;
         this.cardId = cardId;
+        this.hasUp = hasUp;
     }
 
     @Generated(hash = 477726293)
@@ -212,5 +214,17 @@ public class Record {
 
     public void setCardId(String cardId) {
         this.cardId = cardId;
+    }
+
+    public boolean isHasUp() {
+        return hasUp;
+    }
+
+    public void setHasUp(boolean hasUp) {
+        this.hasUp = hasUp;
+    }
+
+    public boolean getHasUp() {
+        return this.hasUp;
     }
 }
