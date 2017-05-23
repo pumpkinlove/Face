@@ -39,7 +39,7 @@ public class LoadingActivity extends BaseActivity {
         eventBus.register(this);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onInitCWEvent(InitCWEvent e) {
         switch (e.getResult()) {
             case InitCWEvent.ERR_FILE_COMPARE:

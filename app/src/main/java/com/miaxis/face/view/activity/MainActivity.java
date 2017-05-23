@@ -2,12 +2,15 @@ package com.miaxis.face.view.activity;
 
 import android.app.smdt.SmdtManager;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.hardware.Camera;
+import android.hardware.camera2.params.Face;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -18,9 +21,13 @@ import android.widget.TextView;
 
 import com.miaxis.face.R;
 import com.miaxis.face.app.Face_App;
+import com.miaxis.face.bean.Config;
 import com.miaxis.face.bean.Record;
 import com.miaxis.face.event.DrawRectEvent;
 import com.miaxis.face.event.ResultEvent;
+import com.miaxis.face.greendao.gen.ConfigDao;
+import com.miaxis.face.greendao.gen.RecordDao;
+import com.miaxis.face.service.UpLoadRecordService;
 import com.miaxis.face.util.FileUtil;
 import com.miaxis.face.util.LogUtil;
 import com.miaxis.face.util.MyUtil;
@@ -83,8 +90,6 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     private SmdtManager smdtManager;
     private EventBus eventBus;
 
-    private byte[] idFaceFeature;               // 二代证照片 人脸特征
-
     private ExecutorService executorService = Executors.newSingleThreadExecutor();  //用来进行特征提取的线程池
 
     private boolean isExtractWorking;
@@ -92,8 +97,12 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     private boolean extractFlag;
     private boolean matchFlag;
 
+    private byte[] idFaceFeature;               // 二代证照片 人脸特征
     private byte[] curFaceFeature;
     private byte[] curCameraImg;
+
+    private Config config;
+    private RecordDao recordDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +123,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         dtload = new mxImageLoad();
         eventBus = EventBus.getDefault();
         eventBus.register(this);
+        recordDao = Face_App.getRecordDao();
     }
 
     void initView() {
@@ -214,6 +224,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     @Override
     protected void onResume() {
         super.onResume();
+        config = Face_App.getConfig();
     }
 
     @Override
@@ -323,6 +334,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                 float[] fScore = new float[1];
                 int re = mxFaceAPI.mxFeatureMatch(idFaceFeature, curFaceFeature, fScore);
                 if (re == 0 && fScore[0] >= PASS_SCORE ) {
+                    eventBus.post(new ResultEvent(ResultEvent.FACE_SUCCESS, mRecord));
                     Log.e("MatchRunnable___", "验证通过 " + re + " _" + fScore[0]);
                 } else {
                     Log.e("MatchRunnable___", "验证失败 " + re + " _" + fScore[0]);
@@ -518,6 +530,23 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             extractFlag = true;
             matchFlag = true;
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void onResultEvent(ResultEvent e) {
+        switch (e.getResult()) {
+            case ResultEvent.FACE_SUCCESS:
+                mRecord.setStatus("人脸通过");
+                UpLoadRecordService.startActionFoo(this, mRecord);
+                break;
+            case ResultEvent.FINGER_SUCCESS:
+                mRecord.setStatus("指纹通过");
+                break;
+            case ResultEvent.FAIL:
+                mRecord.setStatus("失败");
+                break;
+        }
+
     }
 
 }

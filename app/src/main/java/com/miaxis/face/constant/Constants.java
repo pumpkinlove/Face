@@ -39,4 +39,17 @@ public class Constants {
     public static final int mFingerDataSize    = 512;          // 指纹数据长度
     public static final int mFingerDataB64Size = 684;          // 指纹数据Base64编码后的长度
 
+    public static final String DEFAULT_IP = "183.129.171.153";
+    public static final int DEFAULT_PORT = 9200;
+    public static final String DEFAULT_UPTIME = "3:00";
+    public static final float DEFAULT_SCORE = 0.71f;
+    public static final boolean DEFAULT_NET = false;
+    public static final boolean DEFAULT_FINGER = false;
+    public static final int DEFAULT_INTERVAL = 3;
+    public static final String DEFAULT_BANNER = "";
+
+    public static final String CHECK_VERSION = "app/getAppInfo";
+    public static final String DOWN_VERSION = "app/getApp";
+    public static final String UPLOAD_PERSON = "person/uploadPerson";
+
 }

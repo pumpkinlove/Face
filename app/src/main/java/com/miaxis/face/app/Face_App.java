@@ -2,12 +2,19 @@ package com.miaxis.face.app;
 
 import android.app.Application;
 import android.app.smdt.SmdtManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.miaxis.face.bean.Config;
+import com.miaxis.face.constant.Constants;
 import com.miaxis.face.event.InitCWEvent;
 import com.miaxis.face.event.ReInitEvent;
+import com.miaxis.face.greendao.gen.ConfigDao;
+import com.miaxis.face.greendao.gen.DaoMaster;
+import com.miaxis.face.greendao.gen.DaoSession;
+import com.miaxis.face.greendao.gen.RecordDao;
 import com.miaxis.face.util.FileUtil;
 import com.miaxis.face.util.LogUtil;
 
@@ -30,6 +37,9 @@ public class Face_App extends Application {
     private static MXFaceAPI mxAPI;
     private SmdtManager smdtManager;
     private EventBus eventBus;
+    private static ConfigDao configDao;
+    private static RecordDao recordDao;
+    private static Config config;
 
     @Override
     public void onCreate() {
@@ -37,6 +47,8 @@ public class Face_App extends Application {
 
         initData();
         initCW();
+        initDbHelp();
+        initConfig();
         smdtManager.smdtSetExtrnalGpioValue(2, true);
     }
 
@@ -55,9 +67,40 @@ public class Face_App extends Application {
             @Override
             public void run() {
                 int re = mxAPI.mxInitAlg(getApplicationContext(), null, false);
-                eventBus.post(new InitCWEvent(re));
+                eventBus.postSticky(new InitCWEvent(re));
             }
         }).start();
+    }
+
+    private void initDbHelp() {
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "recluse-db", null);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(db);
+        DaoSession daoSession = daoMaster.newSession();
+        configDao = daoSession.getConfigDao();
+        recordDao = daoSession.getRecordDao();
+    }
+
+
+    public static void initConfig() {
+        try {
+            config = configDao.loadByRowId(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (config == null) {
+            config = new Config();
+            config.setId(1);
+            config.setIp(Constants.DEFAULT_IP);
+            config.setPort(Constants.DEFAULT_PORT);
+            config.setIntervalTime(Constants.DEFAULT_INTERVAL);
+            config.setBanner(Constants.DEFAULT_BANNER);
+            config.setUpTime(Constants.DEFAULT_UPTIME);
+            config.setPassScore(Constants.PASS_SCORE);
+            config.setFingerFlag(Constants.DEFAULT_FINGER);
+            config.setNetFlag(Constants.DEFAULT_NET);
+            configDao.insert(config);
+        }
     }
 
     boolean readLicence() {
@@ -77,6 +120,19 @@ public class Face_App extends Application {
 
     public static MXFaceAPI getMxAPI() {
         return mxAPI;
+    }
+
+    public static ConfigDao getConfigDao() {
+        return configDao;
+    }
+
+    public static RecordDao getRecordDao() {
+        return recordDao;
+    }
+
+    public static Config getConfig() {
+        initConfig();
+        return config;
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

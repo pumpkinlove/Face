@@ -1,7 +1,11 @@
 package com.miaxis.face.bean;
 
+import com.miaxis.face.greendao.gen.ConfigDao;
+import com.miaxis.face.greendao.gen.DaoSession;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Id;
 
 /**
  * Created by Administrator on 2017/5/18 0018.
@@ -9,8 +13,10 @@ import org.greenrobot.greendao.annotation.Generated;
 @Entity
 public class Config {
 
+    @Id
+    private long id;
     private String ip;
-    private String port;
+    private int port;
     private String upTime;
     private float  passScore;
     private String banner;
@@ -20,10 +26,11 @@ public class Config {
     private boolean fingerFlag;
     private boolean netFlag;
 
-    @Generated(hash = 1069084555)
-    public Config(String ip, String port, String upTime, float passScore,
+    @Generated(hash = 659147122)
+    public Config(long id, String ip, int port, String upTime, float passScore,
             String banner, int intervalTime, String orgId, String orgName,
             boolean fingerFlag, boolean netFlag) {
+        this.id = id;
         this.ip = ip;
         this.port = port;
         this.upTime = upTime;
@@ -40,6 +47,14 @@ public class Config {
     public Config() {
     }
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public String getIp() {
         return ip;
     }
@@ -48,11 +63,11 @@ public class Config {
         this.ip = ip;
     }
 
-    public String getPort() {
+    public int getPort() {
         return port;
     }
 
-    public void setPort(String port) {
+    public void setPort(int port) {
         this.port = port;
     }
 
