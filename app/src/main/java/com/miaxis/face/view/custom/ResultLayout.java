@@ -77,6 +77,9 @@ public class ResultLayout extends LinearLayout {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onResultEvent(ResultEvent e) {
         Record record = e.getRecord();
+        if (record == null) {
+            return;
+        }
         switch (e.getResult()) {
             case ResultEvent.FACE_SUCCESS:
                 break;

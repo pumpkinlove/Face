@@ -57,4 +57,11 @@ public class Constants {
 
     public static final int RESULT_CODE_FINISH = 51243123;
 
+    public static final int LEVEL              = 2;            // 指纹比对级别
+    public static final int TIME_OUT           = 10 * 1000;    // 等待按手指的超时时间，单位：ms
+    public static final int IMAGE_X_BIG        = 256;          // 指纹图像宽高 大小
+    public static final int IMAGE_Y_BIG        = 360;
+    public static final int IMAGE_SIZE_BIG     = IMAGE_X_BIG * IMAGE_Y_BIG;
+    public static final int TZ_SIZE            = 512;          // 指纹特征长度  BASE64
+
 }

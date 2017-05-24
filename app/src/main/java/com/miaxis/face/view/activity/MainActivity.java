@@ -36,6 +36,7 @@ import com.miaxis.face.event.ResultEvent;
 import com.miaxis.face.event.TimeChangeEvent;
 import com.miaxis.face.greendao.gen.RecordDao;
 import com.miaxis.face.receiver.TimeReceiver;
+import com.miaxis.face.service.FingerService;
 import com.miaxis.face.service.UpLoadRecordService;
 import com.miaxis.face.util.DateUtil;
 import com.miaxis.face.util.FileUtil;
@@ -129,13 +130,14 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
+        initWindow();
         initData();
         initView();
-        initAMapSDK();
         initSurface();
+        initAMapSDK();
         initTimeReceiver();
         startReadId();
+        startMonitor();
     }
 
     void initData() {
@@ -215,6 +217,11 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         t.start();
     }
 
+    void startMonitor() {
+        Thread monitorThread = new MonitorThread();
+        monitorThread.start();
+    }
+
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         openCamera();
@@ -232,6 +239,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
+        lastCallBackTime = System.currentTimeMillis();
         if (!detectFlag) {
             return;
         }
@@ -250,6 +258,8 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                 ExtractAndMatch matchRunnable = new ExtractAndMatch(rotateData, pFaceBuffer);
                 executorService.submit(matchRunnable);
             }
+        } else {
+            eventBus.post(new DrawRectEvent(0, pFaceBuffer));
         }
     }
 
@@ -257,7 +267,9 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     public void onRect(DrawRectEvent e) {
         Canvas canvas = shRect.lockCanvas(null);
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-        drawFaceRect(e.getFaceInfos(), canvas, e.getFaceNum());
+        if (e.getFaceNum() != 0) {
+            drawFaceRect(e.getFaceInfos(), canvas, e.getFaceNum());
+        }
         shRect.unlockCanvasAndPost(canvas);
     }
 
@@ -265,11 +277,15 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     protected void onResume() {
         super.onResume();
         config = Face_App.getConfig();
+        monitorFlag = true;
+        readIdFlag = true;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        monitorFlag = false;
+        readIdFlag = false;
     }
 
     @Override
@@ -368,6 +384,8 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
 
     }
 
+    private boolean readIdFlag = true;
+
     class ReadIdThread extends Thread {
         @Override
         public void run() {
@@ -375,6 +393,14 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             byte[] curCardId;
             int re;
             while (true) {
+                if (!readIdFlag) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    continue;
+                }
                 curCardId = new byte[64];
                 re = idCardDriver.mxReadCardId(curCardId);
                 switch (re) {
@@ -424,7 +450,13 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                     eventBus.post(new ResultEvent(ResultEvent.FACE_SUCCESS, mRecord));
                     Log.e("MatchRunnable___", "验证通过 " + re + " _" + fScore[0]);
                 } else {
-                    eventBus.post(new ResultEvent(ResultEvent.FAIL, mRecord));
+                    if (config.isFingerFlag() && mRecord.getFinger0() != null && mRecord.getFinger0().length() > 0) {
+                        eventBus.post(new ResultEvent(ResultEvent.FACE_FAIL_HAS_FINGER, mRecord));
+                        FingerService.startActionFinger(getApplicationContext(), mRecord);
+                    } else {
+                        eventBus.post(new ResultEvent(ResultEvent.FAIL, mRecord));
+                    }
+
                     Log.e("MatchRunnable___", "验证失败 " + re + " _" + fScore[0]);
                 }
                 matchFlag = false;
@@ -665,6 +697,33 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         if (requestCode == 1) {
             if (resultCode == Constants.RESULT_CODE_FINISH) {
                 finish();
+            }
+        }
+    }
+
+    private long lastCallBackTime = 9999999999999L;
+    private boolean monitorFlag = true;
+
+    class MonitorThread extends Thread {
+        @Override
+        public void run() {
+            try {
+                while (true) {
+                    Thread.sleep(1000);
+                    if (monitorFlag) {
+                        long cur = new Date().getTime();
+                        if ((cur - lastCallBackTime) >= config.getIntervalTime() * 1000) {
+                            if (mCamera != null) {
+                                mCamera.stopPreview();
+                                mCamera.setPreviewCallback(MainActivity.this);
+                                mCamera.startPreview();
+                                LogUtil.writeLog("修复视频卡顿");
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

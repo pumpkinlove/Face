@@ -32,7 +32,7 @@ public class LoadingActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
         ButterKnife.bind(this);
-
+        initWindow();
         gifLoading.setMovieResource(R.raw.loading);
         eventBus = EventBus.getDefault();
         eventBus.register(this);

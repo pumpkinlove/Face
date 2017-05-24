@@ -13,6 +13,7 @@ import com.miaxis.face.bean.Record;
 import com.miaxis.face.constant.Constants;
 import com.miaxis.face.event.InitCWEvent;
 import com.miaxis.face.event.ReInitEvent;
+import com.miaxis.face.event.TimerResetEvent;
 import com.miaxis.face.greendao.gen.ConfigDao;
 import com.miaxis.face.greendao.gen.DaoMaster;
 import com.miaxis.face.greendao.gen.DaoSession;
@@ -206,6 +207,30 @@ public class Face_App extends Application {
                 upLoad();
             }
         };
+    }
+
+    @SuppressWarnings("deprecation")
+    public void reSetTimer() {
+        timerTask.cancel();
+        initTask();
+        timer.cancel();
+        timer.purge();
+        timer = new Timer();
+        Date start = new Date();
+        start.setHours(Integer.valueOf(config.getUpTime().split(" : ")[0]));
+        start.setMinutes(Integer.valueOf(config.getUpTime().split(" : ")[1]));
+        start.setSeconds(0);
+        long tStart = start.getTime();
+        long t1 = new Date().getTime();
+        if (tStart < t1) {
+            start.setDate(new Date().getDate() + 1);
+        }
+        timer.schedule(timerTask, start, Constants.TASK_DELAY);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onTimerResetEvent(TimerResetEvent e) {
+        reSetTimer();
     }
 
 }
