@@ -2,4 +2,5 @@
     <string name="app_name">人证核验</string>
     <string name="result_success">成 功</string>
     <string name="result_failure">失 败</string>
+    <string name="result_press">请按指纹</string>
 </resources>

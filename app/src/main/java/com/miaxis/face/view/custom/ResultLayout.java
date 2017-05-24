@@ -19,6 +19,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -38,6 +39,13 @@ public class ResultLayout extends LinearLayout {
     ImageView ivResult;
     @BindView(R.id.iv_id_photo)
     ImageView ivIdPhoto;
+
+    @BindString(R.string.result_success)
+    String result_success;
+    @BindString(R.string.result_failure)
+    String result_failure;
+    @BindString(R.string.result_press)
+    String result_press;
 
     private EventBus eventBus;
 
@@ -82,15 +90,33 @@ public class ResultLayout extends LinearLayout {
         }
         switch (e.getResult()) {
             case ResultEvent.FACE_SUCCESS:
+                ivResult.setImageResource(R.mipmap.result_true);
+                tvResult.setText(result_success);
+                tvResult.setVisibility(VISIBLE);
+                gifFinger.setVisibility(GONE);
                 break;
             case ResultEvent.FACE_FAIL_HAS_FINGER:
+                ivResult.setImageResource(R.mipmap.result_false);
+                tvResult.setText(result_press);
+                tvResult.setVisibility(VISIBLE);
+                gifFinger.setVisibility(VISIBLE);
                 break;
             case ResultEvent.FINGER_SUCCESS:
+                ivResult.setImageResource(R.mipmap.result_true);
+                tvResult.setText(result_success);
+                tvResult.setVisibility(VISIBLE);
+                gifFinger.setVisibility(GONE);
                 break;
             case ResultEvent.FAIL:
+                ivResult.setImageResource(R.mipmap.result_false);
+                tvResult.setText(result_failure);
+                tvResult.setVisibility(VISIBLE);
+                gifFinger.setVisibility(GONE);
                 break;
             case ResultEvent.ID_PHOTO:
                 setVisibility(VISIBLE);
+                gifFinger.setVisibility(GONE);
+                tvResult.setVisibility(GONE);
                 byte[] bmpData = Base64.decode(record.getCardImg(), Base64.DEFAULT);
                 Bitmap bmp = BitmapFactory.decodeByteArray(bmpData, 0, bmpData.length);
                 ivIdPhoto.setImageBitmap(bmp);
