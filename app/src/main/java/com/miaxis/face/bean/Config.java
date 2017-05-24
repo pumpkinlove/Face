@@ -1,17 +1,18 @@
 package com.miaxis.face.bean;
 
-import com.miaxis.face.greendao.gen.ConfigDao;
-import com.miaxis.face.greendao.gen.DaoSession;
-
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
+
+import java.io.Serializable;
 
 /**
  * Created by Administrator on 2017/5/18 0018.
  */
 @Entity
-public class Config {
+public class Config implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     private long id;
@@ -25,11 +26,12 @@ public class Config {
     private String orgName;
     private boolean fingerFlag;
     private boolean netFlag;
+    private boolean queryFlag;
 
-    @Generated(hash = 659147122)
+    @Generated(hash = 1607863072)
     public Config(long id, String ip, int port, String upTime, float passScore,
             String banner, int intervalTime, String orgId, String orgName,
-            boolean fingerFlag, boolean netFlag) {
+            boolean fingerFlag, boolean netFlag, boolean queryFlag) {
         this.id = id;
         this.ip = ip;
         this.port = port;
@@ -41,6 +43,7 @@ public class Config {
         this.orgName = orgName;
         this.fingerFlag = fingerFlag;
         this.netFlag = netFlag;
+        this.queryFlag = queryFlag;
     }
 
     @Generated(hash = 589037648)
@@ -141,5 +144,17 @@ public class Config {
 
     public boolean getNetFlag() {
         return this.netFlag;
+    }
+
+    public boolean isQueryFlag() {
+        return queryFlag;
+    }
+
+    public void setQueryFlag(boolean queryFlag) {
+        this.queryFlag = queryFlag;
+    }
+
+    public boolean getQueryFlag() {
+        return this.queryFlag;
     }
 }

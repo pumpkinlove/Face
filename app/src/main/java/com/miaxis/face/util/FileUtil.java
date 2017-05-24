@@ -89,13 +89,17 @@ public class FileUtil {
         file.delete();
     }
 
-    public static String getAvailableImgPath(Context context) {
+    public static String getAvailablePath(Context context) {
         File saveDir = new File(new SmdtManager(context).smdtGetSDcardPath(context));
         if (!saveDir.exists() || !saveDir.canWrite()) {
-            return FACE_MAIN_PATH + File.separator + IMG_PATH_NAME;
+            return FACE_MAIN_PATH;
         } else {
-            return saveDir + File.separator + IMG_PATH_NAME;
+            return saveDir.getPath();
         }
+    }
+
+    public static String getAvailableImgPath(Context context) {
+        return getAvailablePath(context) + File.separator + IMG_PATH_NAME;
     }
 
     public static void saveBitmap(Bitmap bitmap, String path, String name) throws Exception {

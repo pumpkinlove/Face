@@ -31,7 +31,6 @@ public class LoadingActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
-        initWindow();
         ButterKnife.bind(this);
 
         gifLoading.setMovieResource(R.raw.loading);
@@ -55,6 +54,7 @@ public class LoadingActivity extends BaseActivity {
                 tvLoading.setText("初始化算法成功");
                 LogUtil.writeLog("初始化算法成功");
                 startActivity(new Intent(this, MainActivity.class));
+                finish();
                 break;
             default:
                 tvLoading.setText("初始化算法失败");

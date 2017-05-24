@@ -10,6 +10,7 @@ import com.miaxis.face.app.Face_App;
 import com.miaxis.face.bean.AjaxResponse;
 import com.miaxis.face.bean.Config;
 import com.miaxis.face.bean.Record;
+import com.miaxis.face.greendao.gen.RecordDao;
 import com.miaxis.face.net.UpLoadRecord;
 
 import retrofit2.Call;
@@ -30,28 +31,20 @@ public class UpLoadRecordService extends IntentService {
     private static final String ACTION_UPLOAD = "com.miaxis.face.service.action.UPLOAD";
 
     private static final String RECORD = "com.miaxis.face.service.extra.RECORD";
+    private static final String CONFIG = "com.miaxis.face.service.extra.CONFIG";
 
     public UpLoadRecordService() {
         super("UpLoadRecordService");
     }
 
     Retrofit retrofit;
+    RecordDao recordDao;
 
-
-    @Override
-    public void onStart(@Nullable Intent intent, int startId) {
-        Config c = Face_App.getConfig();
-        retrofit = new Retrofit.Builder()
-                .baseUrl("http://" + c.getIp() + ":" + c.getPort() + "/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        super.onStart(intent, startId);
-    }
-
-    public static void startActionFoo(Context context, Record record) {
+    public static void startActionFoo(Context context, Record record, Config config) {
         Intent intent = new Intent(context, UpLoadRecordService.class);
         intent.setAction(ACTION_UPLOAD);
         intent.putExtra(RECORD, record);
+        intent.putExtra(CONFIG, config);
         context.startService(intent);
     }
 
@@ -61,24 +54,52 @@ public class UpLoadRecordService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_UPLOAD.equals(action)) {
                 final Record record = (Record) intent.getSerializableExtra(RECORD);
-                handleActionFoo(record);
+                final Config config = (Config) intent.getSerializableExtra(CONFIG);
+                handleActionUpLoad(record, config);
             }
         }
     }
 
-    private void handleActionFoo(Record record) {
+    private void handleActionUpLoad(final Record record, final Config c) {
+        retrofit = new Retrofit.Builder()
+                .baseUrl("http://" + c.getIp() + ":" + c.getPort() + "/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        recordDao = Face_App.getRecordDao();
         UpLoadRecord up = retrofit.create(UpLoadRecord.class);
-        Call<AjaxResponse> call = up.upLoadRecord(record);
+        Call<AjaxResponse> call = up.upLoadRecord(
+                record.getId()+"",
+                record.getCardNo(),
+                record.getName(),
+                record.getSex(),
+                record.getBirthday(),
+                record.getAddress(),
+                record.getBusEntity(),
+                record.getStatus(),
+                record.getCardImg(),
+                record.getFaceImg(),
+                record.getFinger0(),
+                record.getFinger1(),
+                record.getPrintFinger(),
+                record.getLocation(),
+                record.getLongitude(),
+                record.getLatitude(),
+                record.getCreateDate(),
+                record.getDevsn(),
+                record.getCardId()
+                );
         call.enqueue(new Callback<AjaxResponse>() {
             @Override
             public void onResponse(Call<AjaxResponse> call, Response<AjaxResponse> response) {
                 AjaxResponse a = response.body();
-                Log.e("onResponse", a.getMessage());
+                if (a.getCode() == AjaxResponse.SUCCESS) {
+                    record.setHasUp(true);
+                    recordDao.update(record);
+                }
             }
 
             @Override
             public void onFailure(Call<AjaxResponse> call, Throwable t) {
-                Log.e("onFailure", "onFailure");
             }
         });
 

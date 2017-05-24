@@ -5,9 +5,11 @@ import android.app.smdt.SmdtManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.miaxis.face.bean.Config;
+import com.miaxis.face.bean.Record;
 import com.miaxis.face.constant.Constants;
 import com.miaxis.face.event.InitCWEvent;
 import com.miaxis.face.event.ReInitEvent;
@@ -15,6 +17,7 @@ import com.miaxis.face.greendao.gen.ConfigDao;
 import com.miaxis.face.greendao.gen.DaoMaster;
 import com.miaxis.face.greendao.gen.DaoSession;
 import com.miaxis.face.greendao.gen.RecordDao;
+import com.miaxis.face.service.UpLoadRecordService;
 import com.miaxis.face.util.FileUtil;
 import com.miaxis.face.util.LogUtil;
 
@@ -25,6 +28,10 @@ import org.zz.faceapi.MXFaceAPI;
 
 
 import java.io.File;
+import java.util.Date;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import cn.cloudwalk.sdk.ConStant;
 
@@ -40,6 +47,8 @@ public class Face_App extends Application {
     private static ConfigDao configDao;
     private static RecordDao recordDao;
     private static Config config;
+    private static Timer timer;
+    public static TimerTask timerTask;
 
     @Override
     public void onCreate() {
@@ -50,6 +59,8 @@ public class Face_App extends Application {
         initDbHelp();
         initConfig();
         smdtManager.smdtSetExtrnalGpioValue(2, true);
+        startTask();
+
     }
 
     void initData() {
@@ -73,14 +84,13 @@ public class Face_App extends Application {
     }
 
     private void initDbHelp() {
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "recluse-db", null);
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(new GreenDaoContext(this), "Face.db", null);
         SQLiteDatabase db = helper.getWritableDatabase();
         DaoMaster daoMaster = new DaoMaster(db);
         DaoSession daoSession = daoMaster.newSession();
         configDao = daoSession.getConfigDao();
         recordDao = daoSession.getRecordDao();
     }
-
 
     public static void initConfig() {
         try {
@@ -99,6 +109,7 @@ public class Face_App extends Application {
             config.setPassScore(Constants.PASS_SCORE);
             config.setFingerFlag(Constants.DEFAULT_FINGER);
             config.setNetFlag(Constants.DEFAULT_NET);
+            config.setQueryFlag(Constants.DEFAULT_NET);
             configDao.insert(config);
         }
     }
@@ -157,4 +168,44 @@ public class Face_App extends Application {
             }
         }).start();
     }
+
+    public static final int GROUP_SIZE = 100;
+
+    private void upLoad() {
+        long count = recordDao.count();
+        long page = (count % GROUP_SIZE == 0) ? count / GROUP_SIZE : (count / GROUP_SIZE + 1);
+        for (int i = 0; i < page; i ++) {
+            List<Record> recordList = recordDao.queryBuilder().offset(i * 100).limit(GROUP_SIZE).orderAsc(RecordDao.Properties.Id).list();
+            for (Record record : recordList) {
+                Log.e("UpLoad", "===========  " + record.getName());
+                if (!record.isHasUp()) {
+                    UpLoadRecordService.startActionFoo(getApplicationContext(), record, config);
+                }
+            }
+        }
+    }
+
+    private void startTask() {
+        initTask();
+        Date start = new Date();
+        start.setHours(Integer.valueOf(config.getUpTime().split(" : ")[0]));
+        start.setMinutes(Integer.valueOf(config.getUpTime().split(" : ")[1]));
+        long tStart = start.getTime();
+        long t1 = new Date().getTime();
+        if (tStart < t1) {
+            start.setDate(new Date().getDate() + 1);
+        }
+        timer.schedule(timerTask, start, Constants.TASK_DELAY);
+    }
+
+    private void initTask() {
+        timer = new Timer(true);
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                upLoad();
+            }
+        };
+    }
+
 }

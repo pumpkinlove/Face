@@ -304,7 +304,7 @@ public class UsbBase {
 	 * */
 	private void regUsbMonitor()
 	{
-		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-		m_ctx.registerReceiver(mUsbReceiver, filter);
+//		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+//		m_ctx.registerReceiver(mUsbReceiver, filter);
 	}
 }

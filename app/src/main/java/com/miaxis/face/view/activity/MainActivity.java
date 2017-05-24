@@ -2,15 +2,13 @@ package com.miaxis.face.view.activity;
 
 import android.app.smdt.SmdtManager;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.IntentFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.hardware.Camera;
-import android.hardware.camera2.params.Face;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -19,15 +17,27 @@ import android.view.SurfaceView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
+import com.amap.api.services.weather.LocalWeatherForecastResult;
+import com.amap.api.services.weather.LocalWeatherLive;
+import com.amap.api.services.weather.LocalWeatherLiveResult;
+import com.amap.api.services.weather.WeatherSearch;
+import com.amap.api.services.weather.WeatherSearchQuery;
 import com.miaxis.face.R;
 import com.miaxis.face.app.Face_App;
 import com.miaxis.face.bean.Config;
 import com.miaxis.face.bean.Record;
+import com.miaxis.face.constant.Constants;
 import com.miaxis.face.event.DrawRectEvent;
 import com.miaxis.face.event.ResultEvent;
-import com.miaxis.face.greendao.gen.ConfigDao;
+import com.miaxis.face.event.TimeChangeEvent;
 import com.miaxis.face.greendao.gen.RecordDao;
+import com.miaxis.face.receiver.TimeReceiver;
 import com.miaxis.face.service.UpLoadRecordService;
+import com.miaxis.face.util.DateUtil;
 import com.miaxis.face.util.FileUtil;
 import com.miaxis.face.util.LogUtil;
 import com.miaxis.face.util.MyUtil;
@@ -43,6 +53,8 @@ import org.zz.idcard_hid_driver.IdCardDriver;
 import org.zz.jni.mxImageLoad;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
@@ -55,7 +67,7 @@ import butterknife.OnClick;
 
 import static com.miaxis.face.constant.Constants.*;
 
-public class MainActivity extends BaseActivity implements SurfaceHolder.Callback, Camera.PreviewCallback {
+public class MainActivity extends BaseActivity implements SurfaceHolder.Callback, Camera.PreviewCallback, AMapLocationListener, WeatherSearch.OnWeatherSearchListener {
 
     @BindView(R.id.tv_title)
     TextView tvTitle;
@@ -87,8 +99,12 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     private MXFaceAPI mxFaceAPI;
     private IdCardDriver idCardDriver;          // 二代证
     private mxImageLoad dtload;                 // 加载图像
+    public AMapLocationClient mLocationClient;
+    private WeatherSearchQuery mQuery;
+    private WeatherSearch mWeatherSearch;
     private SmdtManager smdtManager;
     private EventBus eventBus;
+    private TimeReceiver timeReceiver;
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();  //用来进行特征提取的线程池
 
@@ -101,6 +117,10 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     private byte[] curFaceFeature;
     private byte[] curCameraImg;
 
+    private double latitude;
+    private double longitude;
+    private String location;
+
     private Config config;
     private RecordDao recordDao;
 
@@ -112,7 +132,9 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
 
         initData();
         initView();
+        initAMapSDK();
         initSurface();
+        initTimeReceiver();
         startReadId();
     }
 
@@ -140,11 +162,29 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         shRect.setFormat(PixelFormat.TRANSLUCENT);
     }
 
+    void initAMapSDK() {
+        mLocationClient = new AMapLocationClient(getApplicationContext());
+        mLocationClient.setLocationListener(this);
+        AMapLocationClientOption mLocationOption = new AMapLocationClientOption();
+        mLocationOption.setInterval(1000 * 30 * 1);
+        mLocationClient.setLocationOption(mLocationOption);
+        mLocationClient.startLocation();
+    }
+
+    void initTimeReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_TIME_TICK);
+        timeReceiver = new TimeReceiver();
+        registerReceiver(timeReceiver, filter);
+        onTimeEvent(null);
+    }
+
     void openCamera() {
         try {
             mCamera = Camera.open();
             Camera.Parameters parameters = mCamera.getParameters();
             parameters.setPreviewSize(PRE_WIDTH, PRE_HEIGHT);
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
             parameters.setPreviewFpsRange(20, 30);
             parameters.setPictureSize(PIC_WIDTH, PIC_HEIGHT);
             mCamera.setParameters(parameters);
@@ -236,11 +276,12 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     protected void onDestroy() {
         super.onDestroy();
         eventBus.unregister(this);
+        unregisterReceiver(timeReceiver);
     }
 
     @OnClick(R.id.tv_title)
     void onTestClick() {
-        startActivity(new Intent(this, TestActivity.class));
+        startActivityForResult(new Intent(this, SettingActivity.class), 1);
     }
 
     /* 画人脸框 */
@@ -279,6 +320,52 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             canvas.drawLine(stopX,          stopY,          stopX + iLen,   stopY,          mPaint);
             canvas.drawLine(startX - iLen,  stopY,          startX,         stopY,          mPaint);
         }
+    }
+
+    @Override
+    public void onLocationChanged(AMapLocation aMapLocation) {
+        if (aMapLocation != null) {
+            if (aMapLocation.getErrorCode() == 0) {
+                latitude = aMapLocation.getLatitude();
+                longitude = aMapLocation.getLongitude();
+                location = aMapLocation.getAddress();
+                queryWeather(aMapLocation.getCity());
+            } else {
+//                tv_weather.setText("无天气信息");
+                Log.e("AMapError","location Error, ErrCode:"
+                        + aMapLocation.getErrorCode() + ", errInfo:"
+                        + aMapLocation.getErrorInfo());
+            }
+        } else {
+            tvWeather.setText("无天气信息");
+        }
+    }
+
+    void queryWeather(String city) {
+        mQuery = new WeatherSearchQuery(city, WeatherSearchQuery.WEATHER_TYPE_LIVE);
+        mWeatherSearch = new WeatherSearch(this);
+        mWeatherSearch.setOnWeatherSearchListener(this);
+        mWeatherSearch.setQuery(mQuery);
+        mWeatherSearch.searchWeatherAsyn(); //异步搜索
+    }
+
+    @Override
+    public void onWeatherLiveSearched(LocalWeatherLiveResult localWeatherLiveResult, int i) {
+        if (i == 1000) {
+            if (localWeatherLiveResult != null && localWeatherLiveResult.getLiveResult() != null) {
+                LocalWeatherLive weatherLive = localWeatherLiveResult.getLiveResult();
+                tvWeather.setText(weatherLive.getWeather() + weatherLive.getTemperature()+"℃");
+            } else {
+                tvWeather.setText("无天气信息");
+            }
+        } else {
+            tvWeather.setText("无天气信息");
+        }
+    }
+
+    @Override
+    public void onWeatherForecastSearched(LocalWeatherForecastResult localWeatherForecastResult, int i) {
+
     }
 
     class ReadIdThread extends Thread {
@@ -337,6 +424,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                     eventBus.post(new ResultEvent(ResultEvent.FACE_SUCCESS, mRecord));
                     Log.e("MatchRunnable___", "验证通过 " + re + " _" + fScore[0]);
                 } else {
+                    eventBus.post(new ResultEvent(ResultEvent.FAIL, mRecord));
                     Log.e("MatchRunnable___", "验证失败 " + re + " _" + fScore[0]);
                 }
                 matchFlag = false;
@@ -434,7 +522,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
 
         System.arraycopy(bCardInfo, iLen, id_Home, 0, id_Home.length);
         iLen = iLen + id_Home.length;
-//        mRecord.setAddress(MyUtil.unicode2String(id_Home).trim());
+        mRecord.setAddress(MyUtil.unicode2String(id_Home).trim());
 
         System.arraycopy(bCardInfo, iLen, id_Code, 0, id_Code.length);
         iLen = iLen + id_Code.length;
@@ -519,6 +607,8 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             if (re == 0 && fScore[0] >= PASS_SCORE) {
                 eventBus.post(new ResultEvent(ResultEvent.FACE_SUCCESS, mRecord));
                 Log.e("预读___", "验证通过 " + re + " _" + fScore[0]);
+                mRecord.setFaceImg(MyUtil.getYUVBase64(curCameraImg, mCamera.getParameters().getPreviewFormat()));
+                mRecord.setCreateDate(DateUtil.toAll(new Date()));
                 matchFlag = false;
                 extractFlag = false;
             } else {
@@ -537,7 +627,6 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         switch (e.getResult()) {
             case ResultEvent.FACE_SUCCESS:
                 mRecord.setStatus("人脸通过");
-                UpLoadRecordService.startActionFoo(this, mRecord);
                 break;
             case ResultEvent.FINGER_SUCCESS:
                 mRecord.setStatus("指纹通过");
@@ -545,8 +634,40 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             case ResultEvent.FAIL:
                 mRecord.setStatus("失败");
                 break;
+            default:
+                return;
         }
-
+        mRecord.setFaceImg(MyUtil.getYUVBase64(curCameraImg, mCamera.getParameters().getPreviewFormat()));
+        mRecord.setCreateDate(DateUtil.toAll(new Date()));
+        mRecord.setDevsn(MyUtil.getSerialNumber());
+        mRecord.setBusEntity(config.getOrgName());
+        mRecord.setLocation(location);
+        mRecord.setLatitude(latitude+"");
+        mRecord.setLongitude(longitude+"");
+        recordDao.insert(mRecord);
+        UpLoadRecordService.startActionFoo(this, mRecord, config);
     }
+
+    /* 处理 时间变化 事件， 实时更新时间*/
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onTimeEvent(TimeChangeEvent e) {
+        DateFormat dateFormat = new SimpleDateFormat("E  yyyy-MM-dd");
+        DateFormat timeFormat = new SimpleDateFormat("HH:mm");
+        String date = dateFormat.format(new Date());
+        String time = timeFormat.format(new Date());
+        tvTime.setText(time);
+        tvDate.setText(date);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode == Constants.RESULT_CODE_FINISH) {
+                finish();
+            }
+        }
+    }
+
 
 }
