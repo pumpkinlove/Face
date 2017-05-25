@@ -79,6 +79,8 @@
             </intent-filter>
         </receiver>
 
+        <service android:name="com.amap.api.location.APSService"/>
+
         <service
             android:name=".service.FingerService"
             android:exported="false"></service>

@@ -9,11 +9,14 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.hardware.Camera;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -32,6 +35,7 @@ import com.miaxis.face.bean.Config;
 import com.miaxis.face.bean.Record;
 import com.miaxis.face.constant.Constants;
 import com.miaxis.face.event.DrawRectEvent;
+import com.miaxis.face.event.NoCardEvent;
 import com.miaxis.face.event.ResultEvent;
 import com.miaxis.face.event.TimeChangeEvent;
 import com.miaxis.face.greendao.gen.RecordDao;
@@ -58,6 +62,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -66,7 +72,24 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.miaxis.face.constant.Constants.*;
+import static com.miaxis.face.constant.Constants.CP_WIDTH;
+import static com.miaxis.face.constant.Constants.GET_CARD_ID;
+import static com.miaxis.face.constant.Constants.GPIO_INTERVAL;
+import static com.miaxis.face.constant.Constants.LEFT_VOLUME;
+import static com.miaxis.face.constant.Constants.LOOP;
+import static com.miaxis.face.constant.Constants.MAX_FACE_NUM;
+import static com.miaxis.face.constant.Constants.NO_CARD;
+import static com.miaxis.face.constant.Constants.PASS_SCORE;
+import static com.miaxis.face.constant.Constants.PHOTO_SIZE;
+import static com.miaxis.face.constant.Constants.PIC_HEIGHT;
+import static com.miaxis.face.constant.Constants.PIC_WIDTH;
+import static com.miaxis.face.constant.Constants.PRE_HEIGHT;
+import static com.miaxis.face.constant.Constants.PRE_WIDTH;
+import static com.miaxis.face.constant.Constants.PRIORITY;
+import static com.miaxis.face.constant.Constants.RIGHT_VOLUME;
+import static com.miaxis.face.constant.Constants.SOUND_RATE;
+import static com.miaxis.face.constant.Constants.mFingerDataSize;
+import static com.miaxis.face.constant.Constants.zoomRate;
 
 public class MainActivity extends BaseActivity implements SurfaceHolder.Callback, Camera.PreviewCallback, AMapLocationListener, WeatherSearch.OnWeatherSearchListener {
 
@@ -90,12 +113,17 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     ResultLayout rvResult;
     @BindColor(R.color.white)
     int white;
+    @BindView(R.id.tv_pass)
+    TextView tvPass;
 
     private Record mRecord;
 
     private Camera mCamera;
     private SurfaceHolder shMain;
     private SurfaceHolder shRect;
+
+    private SoundPool soundPool;
+    private Map<Integer, Integer> soundMap;
 
     private MXFaceAPI mxFaceAPI;
     private IdCardDriver idCardDriver;          // 二代证
@@ -117,6 +145,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     private byte[] idFaceFeature;               // 二代证照片 人脸特征
     private byte[] curFaceFeature;
     private byte[] curCameraImg;
+    private MXFaceInfo curFaceInfo;
 
     private double latitude;
     private double longitude;
@@ -148,6 +177,11 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         eventBus = EventBus.getDefault();
         eventBus.register(this);
         recordDao = Face_App.getRecordDao();
+
+        soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+        soundMap = new HashMap<>();
+        soundMap.put(1, soundPool.load(this, R.raw.success, 1));
+        soundMap.put(2, soundPool.load(this, R.raw.fail, 1));
     }
 
     void initView() {
@@ -222,6 +256,10 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         monitorThread.start();
     }
 
+    void playSound(int soundID) {
+        soundPool.play(soundMap.get(soundID), LEFT_VOLUME, RIGHT_VOLUME, PRIORITY, LOOP, SOUND_RATE);
+    }
+
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         openCamera();
@@ -243,7 +281,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         if (!detectFlag) {
             return;
         }
-        int[] pFaceNum  = new int[1];
+        int[] pFaceNum = new int[1];
         pFaceNum[0] = MAX_FACE_NUM;
         MXFaceInfo[] pFaceBuffer = new MXFaceInfo[MAX_FACE_NUM];
         for (int i = 0; i < MAX_FACE_NUM; i++) {
@@ -258,14 +296,15 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                 ExtractAndMatch matchRunnable = new ExtractAndMatch(rotateData, pFaceBuffer);
                 executorService.submit(matchRunnable);
             }
-        } else {
-            eventBus.post(new DrawRectEvent(0, pFaceBuffer));
         }
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onRect(DrawRectEvent e) {
         Canvas canvas = shRect.lockCanvas(null);
+        if (canvas == null) {
+            return;
+        }
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         if (e.getFaceNum() != 0) {
             drawFaceRect(e.getFaceInfos(), canvas, e.getFaceNum());
@@ -306,7 +345,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         float[] startArrayY = new float[len];
         float[] stopArrayX = new float[len];
         float[] stopArrayY = new float[len];
-        for (int i=0; i<len; i++) {
+        for (int i = 0; i < len; i++) {
             startArrayX[i] = (CP_WIDTH - faceInfos[i].x * zoomRate);
             startArrayY[i] = (faceInfos[i].y * zoomRate);
             stopArrayX[i] = (CP_WIDTH - faceInfos[i].x * zoomRate - faceInfos[i].width * zoomRate);
@@ -317,7 +356,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
 
     /* 画线 */
     void canvasDrawLine(Canvas canvas, int iNum, float[] startArrayX, float[] startArrayY, float[] stopArrayX, float[] stopArrayY) {
-        int iLen  = 50;
+        int iLen = 50;
         Paint mPaint = new Paint();
         mPaint.setColor(white);
         float startX, startY, stopX, stopY;
@@ -327,14 +366,14 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             stopX = stopArrayX[i];
             stopY = stopArrayY[i];
             mPaint.setStrokeWidth(6);// 设置画笔粗细
-            canvas.drawLine(startX,         startY,         startX - iLen,  startY,         mPaint);
-            canvas.drawLine(stopX + iLen,   startY,         stopX,          startY,         mPaint);
-            canvas.drawLine(startX,         startY,         startX,         startY + iLen,  mPaint);
-            canvas.drawLine(startX,         stopY - iLen,   startX,         stopY,          mPaint);
-            canvas.drawLine(stopX,          stopY,          stopX,          stopY - iLen,   mPaint);
-            canvas.drawLine(stopX,          startY + iLen,  stopX,          startY,         mPaint);
-            canvas.drawLine(stopX,          stopY,          stopX + iLen,   stopY,          mPaint);
-            canvas.drawLine(startX - iLen,  stopY,          startX,         stopY,          mPaint);
+            canvas.drawLine(startX, startY, startX - iLen, startY, mPaint);
+            canvas.drawLine(stopX + iLen, startY, stopX, startY, mPaint);
+            canvas.drawLine(startX, startY, startX, startY + iLen, mPaint);
+            canvas.drawLine(startX, stopY - iLen, startX, stopY, mPaint);
+            canvas.drawLine(stopX, stopY, stopX, stopY - iLen, mPaint);
+            canvas.drawLine(stopX, startY + iLen, stopX, startY, mPaint);
+            canvas.drawLine(stopX, stopY, stopX + iLen, stopY, mPaint);
+            canvas.drawLine(startX - iLen, stopY, startX, stopY, mPaint);
         }
     }
 
@@ -348,7 +387,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                 queryWeather(aMapLocation.getCity());
             } else {
 //                tv_weather.setText("无天气信息");
-                Log.e("AMapError","location Error, ErrCode:"
+                Log.e("AMapError", "location Error, ErrCode:"
                         + aMapLocation.getErrorCode() + ", errInfo:"
                         + aMapLocation.getErrorInfo());
             }
@@ -370,7 +409,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         if (i == 1000) {
             if (localWeatherLiveResult != null && localWeatherLiveResult.getLiveResult() != null) {
                 LocalWeatherLive weatherLive = localWeatherLiveResult.getLiveResult();
-                tvWeather.setText(weatherLive.getWeather() + weatherLive.getTemperature()+"℃");
+                tvWeather.setText(weatherLive.getWeather() + weatherLive.getTemperature() + "℃");
             } else {
                 tvWeather.setText("无天气信息");
             }
@@ -417,7 +456,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                         lastCardId = curCardId;
                         break;
                     case NO_CARD:
-                        closeLed();
+                        eventBus.post(new NoCardEvent());
                         lastCardId = null;
                         break;
                 }
@@ -428,7 +467,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     /* 线程 从视频流中提取特征并比对 */
     class ExtractAndMatch implements Runnable {
         private byte[] pCameraData = null;
-        private MXFaceInfo[]  pFaceBuffer = null;
+        private MXFaceInfo[] pFaceBuffer = null;
 
         public ExtractAndMatch(byte[] pCameraData, MXFaceInfo[] pFaceBuffer) {
             this.pCameraData = pCameraData;
@@ -440,23 +479,25 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             long t1 = System.currentTimeMillis();
             curFaceFeature = extractFeature(pFaceBuffer[0]);
             curCameraImg = pCameraData;
+            curFaceInfo = pFaceBuffer[0];
             extractFlag = false;
             long t2 = System.currentTimeMillis();
             Log.e("mxFeatureExtract", "耗时：" + (t2 - t1));
             if (curFaceFeature != null && matchFlag) {
                 float[] fScore = new float[1];
                 int re = mxFaceAPI.mxFeatureMatch(idFaceFeature, curFaceFeature, fScore);
-                if (re == 0 && fScore[0] >= PASS_SCORE ) {
-                    eventBus.post(new ResultEvent(ResultEvent.FACE_SUCCESS, mRecord));
+                if (re == 0 && fScore[0] >= PASS_SCORE) {
+                    mRecord.setFaceImg(MyUtil.getYUVBase64(curCameraImg, mCamera.getParameters().getPreviewFormat()));
+                    eventBus.post(new ResultEvent(ResultEvent.FACE_SUCCESS, mRecord, pFaceBuffer[0]));
                     Log.e("MatchRunnable___", "验证通过 " + re + " _" + fScore[0]);
                 } else {
+                    mRecord.setFaceImg(MyUtil.getYUVBase64(curCameraImg, mCamera.getParameters().getPreviewFormat()));
                     if (config.isFingerFlag() && mRecord.getFinger0() != null && mRecord.getFinger0().length() > 0) {
-                        eventBus.post(new ResultEvent(ResultEvent.FACE_FAIL_HAS_FINGER, mRecord));
+                        eventBus.post(new ResultEvent(ResultEvent.FACE_FAIL_HAS_FINGER, mRecord, pFaceBuffer[0]));
                         FingerService.startActionFinger(getApplicationContext(), mRecord);
                     } else {
-                        eventBus.post(new ResultEvent(ResultEvent.FAIL, mRecord));
+                        eventBus.post(new ResultEvent(ResultEvent.FAIL, mRecord, pFaceBuffer[0]));
                     }
-
                     Log.e("MatchRunnable___", "验证失败 " + re + " _" + fScore[0]);
                 }
                 matchFlag = false;
@@ -498,6 +539,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     }
 
     void readCard() {
+        Log.e("=====", "readCard");
         byte[] bCardFullInfo = new byte[256 + 1024 + 1024];
         int re = idCardDriver.mxReadCardFullInfo(bCardFullInfo);
         if (re == 1) {
@@ -637,12 +679,11 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             float[] fScore = new float[1];
             re = mxFaceAPI.mxFeatureMatch(idFaceFeature, curFaceFeature, fScore);
             if (re == 0 && fScore[0] >= PASS_SCORE) {
-                eventBus.post(new ResultEvent(ResultEvent.FACE_SUCCESS, mRecord));
                 Log.e("预读___", "验证通过 " + re + " _" + fScore[0]);
                 mRecord.setFaceImg(MyUtil.getYUVBase64(curCameraImg, mCamera.getParameters().getPreviewFormat()));
-                mRecord.setCreateDate(DateUtil.toAll(new Date()));
                 matchFlag = false;
                 extractFlag = false;
+                eventBus.post(new ResultEvent(ResultEvent.FACE_SUCCESS, mRecord, curFaceInfo));
             } else {
                 Log.e("预读___", "验证失败 " + re + " _" + fScore[0]);
                 extractFlag = true;
@@ -654,30 +695,37 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onResultEvent(ResultEvent e) {
+        Record record = e.getRecord();
         switch (e.getResult()) {
             case ResultEvent.FACE_SUCCESS:
-                mRecord.setStatus("人脸通过");
+                record.setStatus("人脸通过");
+                playSound(1);
                 break;
             case ResultEvent.FINGER_SUCCESS:
-                mRecord.setStatus("指纹通过");
+                record.setStatus("指纹通过");
+                playSound(1);
                 break;
             case ResultEvent.FAIL:
-                mRecord.setStatus("失败");
+                record.setStatus("失败");
+                playSound(2);
                 break;
+            case ResultEvent.ID_PHOTO:
+                tvPass.setVisibility(View.GONE);
+                return;
             default:
                 return;
         }
-        mRecord.setFaceImg(MyUtil.getYUVBase64(curCameraImg, mCamera.getParameters().getPreviewFormat()));
-        mRecord.setCreateDate(DateUtil.toAll(new Date()));
-        mRecord.setDevsn(MyUtil.getSerialNumber());
-        mRecord.setBusEntity(config.getOrgName());
-        mRecord.setLocation(location);
-        mRecord.setLatitude(latitude+"");
-        mRecord.setLongitude(longitude+"");
-        recordDao.insert(mRecord);
-        UpLoadRecordService.startActionFoo(this, mRecord, config);
+//        record.setFaceImg(MyUtil.getYUVBase64(curCameraImg, mCamera.getParameters().getPreviewFormat()));
+        record.setCreateDate(DateUtil.toAll(new Date()));
+        record.setDevsn(MyUtil.getSerialNumber());
+        record.setBusEntity(config.getOrgName());
+        record.setLocation(location);
+        record.setLatitude(latitude + "");
+        record.setLongitude(longitude + "");
+        recordDao.insert(record);
+        UpLoadRecordService.startActionFoo(this, record, config);
     }
 
     /* 处理 时间变化 事件， 实时更新时间*/
@@ -726,6 +774,19 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                 e.printStackTrace();
             }
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void onNoCardEvent(NoCardEvent e) {
+        tvPass.setVisibility(View.VISIBLE);
+        detectFlag = false;
+        extractFlag = false;
+        matchFlag = false;
+        idFaceFeature = null;
+        curFaceFeature = null;
+        Log.e("onNoCardEvent", "mRecord = null");
+        onRect(new DrawRectEvent(0, null));
+        closeLed();
     }
 
 

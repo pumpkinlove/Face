@@ -64,4 +64,8 @@ public class Constants {
     public static final int IMAGE_SIZE_BIG     = IMAGE_X_BIG * IMAGE_Y_BIG;
     public static final int TZ_SIZE            = 512;          // 指纹特征长度  BASE64
 
+    public static final float LEFT_VOLUME =1.0f, RIGHT_VOLUME =1.0f;
+    public static final int PRIORITY = 1, LOOP = 0;
+    public static final float SOUND_RATE = 1.0f;//正常速率
+
 }

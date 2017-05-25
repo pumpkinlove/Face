@@ -33,4 +33,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
+    <TextView
+        android:visibility="visible"
+        android:id="@+id/tv_pass"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="200dp"
+        android:background="@drawable/qing_stroke_bg"
+        android:translationZ="200dp"
+        android:textColor="@color/qing"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:textSize="90sp"
+        android:text="请放身份证"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
 </RelativeLayout>

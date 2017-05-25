@@ -52,6 +52,7 @@
         </LinearLayout>
 
         <ImageView
+            android:minWidth="50dp"
             android:id="@+id/iv_result"
             android:layout_gravity="center"
             android:layout_width="50dp"
