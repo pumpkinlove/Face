@@ -204,7 +204,9 @@ public class Face_App extends Application {
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                upLoad();
+                if (config.isNetFlag()) {
+                    upLoad();
+                }
             }
         };
     }

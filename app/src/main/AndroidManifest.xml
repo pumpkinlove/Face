@@ -79,11 +79,15 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.amap.api.location.APSService"/>
-
+        <service android:name="com.amap.api.location.APSService" />
         <service
             android:name=".service.FingerService"
-            android:exported="false"></service>
+            android:exported="false" />
+        <service
+            android:name=".service.DownVersionService"
+            android:exported="false" />
+
+        <activity android:name=".view.activity.RecordActivity"></activity>
     </application>
 
 </manifest>

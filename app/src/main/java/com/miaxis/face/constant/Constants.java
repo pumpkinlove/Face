@@ -49,6 +49,7 @@ public class Constants {
     public static final int DEFAULT_INTERVAL = 3;
     public static final String DEFAULT_BANNER = "";
 
+    public static final String PROJECT_NAME = "faceid";
     public static final String CHECK_VERSION = "app/getAppInfo";
     public static final String DOWN_VERSION = "app/getApp";
     public static final String UPLOAD_PERSON = "person/uploadPerson";

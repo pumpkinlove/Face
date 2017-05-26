@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 /**
@@ -67,6 +68,28 @@ public class FileUtil {
             try {
                 if(bw != null) {
                     bw.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void writeFile(InputStream is, File file) {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(file);
+            byte[] b = new byte[1024];
+            while((is.read(b)) != -1){
+                fos.write(b);
+            }
+            fos.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if(fos != null) {
+                    fos.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();

@@ -1,6 +1,7 @@
 package com.miaxis.face.view.activity;
 
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -14,20 +15,31 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.google.gson.Gson;
 import com.miaxis.face.R;
 import com.miaxis.face.app.Face_App;
+import com.miaxis.face.bean.AjaxResponse;
 import com.miaxis.face.bean.Config;
 import com.miaxis.face.bean.Record;
+import com.miaxis.face.bean.Version;
 import com.miaxis.face.constant.Constants;
 import com.miaxis.face.event.TimerResetEvent;
 import com.miaxis.face.greendao.gen.ConfigDao;
 import com.miaxis.face.greendao.gen.RecordDao;
+import com.miaxis.face.net.UpdateVersion;
+import com.miaxis.face.util.MyUtil;
+import com.miaxis.face.view.custom.UpdateDialog;
 
 import org.greenrobot.eventbus.EventBus;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SettingActivity extends BaseActivity {
 
@@ -79,6 +91,7 @@ public class SettingActivity extends BaseActivity {
     Button btnExit;
 
     private Config config;
+    private UpdateDialog updateDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +111,7 @@ public class SettingActivity extends BaseActivity {
         etOrg.setText(config.getOrgName());
         tvSelectTime.setText(config.getUpTime());
         etMonitorInterval.setText(config.getIntervalTime()+"");
-        tvVersion.setText(getVersion());
+        tvVersion.setText(MyUtil.getCurVersion(this).getVersion());
         if (config.getFingerFlag()) {
             rbFingerOn.setChecked(true);
         } else {
@@ -114,6 +127,9 @@ public class SettingActivity extends BaseActivity {
         } else {
             rbNetOff.setChecked(true);
         }
+
+        updateDialog = new UpdateDialog();
+        updateDialog.setContext(this);
     }
 
     @OnClick(R.id.tv_select_time)
@@ -185,40 +201,51 @@ public class SettingActivity extends BaseActivity {
 
     @OnClick(R.id.btn_update)
     void update() {
-        new Thread(new Runnable() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://" + config.getIp() + ":" + config.getPort() + "/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        UpdateVersion uv = retrofit.create(UpdateVersion.class);
+        Call<AjaxResponse> call = uv.checkVerison();
+        call.enqueue(new Callback<AjaxResponse>() {
             @Override
-            public void run() {
-                RecordDao recordDao = Face_App.getRecordDao();
-                for (int i=0; i<500; i++) {
-                    Record record = new Record();
-                    record.setName(i + "");
-                    record.setCardNo(000000000000000000 + i + "");
-                    recordDao.insert(record);
-                    Log.e("=====", "" + i);
+            public void onResponse(Call<AjaxResponse> call, Response<AjaxResponse> rsp) {
+                try {
+                    Version lastVersion = null;
+                    Gson g = new Gson();
+                    AjaxResponse response = rsp.body();
+                    if (response.getCode() == AjaxResponse.FAILURE) {
+                        MyUtil.alert(getFragmentManager(), response.getMessage());
+                        return;
+                    } else if (response.getCode() == AjaxResponse.SUCCESS) {
+                        lastVersion = g.fromJson(g.toJson(response.getData()), Version.class);
+                    }
+                    Version curVersion = MyUtil.getCurVersion(getApplicationContext());
+                    if (lastVersion.getVersionCode() > curVersion.getVersionCode() ) {
+                        updateDialog.setLastVersion(lastVersion);
+                        updateDialog.show(getFragmentManager(),"update_dialog");
+                    } else {
+                        MyUtil.alert(getFragmentManager(), "您已经是最新版了！");
+                    }
+                } catch (Exception e) {
+                    MyUtil.alert(getFragmentManager(), "解析数据失败");
+                    e.printStackTrace();
                 }
             }
-        }).start();
+
+            @Override
+            public void onFailure(Call<AjaxResponse> call, Throwable t) {
+
+            }
+        });
     }
 
     @OnClick(R.id.btn_exit)
     void singOut() {
-        setResult(Constants.RESULT_CODE_FINISH);
-        finish();
-        throw new RuntimeException();
+        startActivity(new Intent(this, RecordActivity.class));
+//        setResult(Constants.RESULT_CODE_FINISH);
+//        finish();
+//        throw new RuntimeException();
     }
 
-    String getVersion() {
-        String versionName = "";
-        try {
-            PackageManager pm = getPackageManager();
-            PackageInfo pi = pm.getPackageInfo(getPackageName(), 0);
-            versionName = pi.versionName;
-            if (versionName == null || versionName.length() <= 0) {
-                return "";
-            }
-        } catch (Exception e) {
-            Log.e("VersionInfo", "Exception", e);
-        }
-        return versionName;
-    }
 }

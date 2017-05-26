@@ -13,4 +13,10 @@
     <color name="black_aero">#a8000000</color>
     <color name="qing">#00ba96</color>
     <color name="qing_aero">#41d7fff7</color>
+
+    <color name="blue_band_dark">#12283d</color>
+    <color name="blue_band_light">#86ecef</color>
+    <color name="blue_band_light2">#61b9bc</color>
+    <color name="blue_band_dark2">#4d5d6d</color>
+    <color name="blue_band_dark3">#9688939e</color>
 </resources>

@@ -38,16 +38,22 @@ dependencies {
     compile files('src/main/libs/commons-codec-1.6.jar')
     compile files('src/main/libs/MXFingerDriver.jar')
     compile files('src/main/libs/smdt.jar')
+    //network - squareup
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.jakewharton:butterknife:8.5.1'
     compile 'org.greenrobot:greendao:3.2.2'
     compile 'org.greenrobot:greendao-generator:3.2.2'
     compile 'org.greenrobot:eventbus:3.0.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
+    compile 'io.reactivex:rxjava:latest.release'
+    compile 'io.reactivex:rxandroid:latest.release'
+    compile 'com.squareup.retrofit2:retrofit:latest.release'
+    compile 'com.squareup.retrofit2:adapter-rxjava:latest.release'
+    compile 'com.squareup.okhttp3:okhttp:latest.release'
+    compile 'com.squareup.okhttp3:logging-interceptor:latest.release'
     testCompile 'junit:junit:4.12'
     apt 'com.jakewharton:butterknife-compiler:8.5.1'
-    compile 'com.squareup.retrofit2:retrofit:2.3.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
     apt 'org.greenrobot:eventbus-annotation-processor:3.0.1'
 }
 apt {

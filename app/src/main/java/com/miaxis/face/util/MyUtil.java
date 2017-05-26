@@ -1,10 +1,17 @@
 package com.miaxis.face.util;
 
+import android.app.FragmentManager;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.util.Base64;
+import android.util.Log;
 
+import com.miaxis.face.bean.Version;
 import com.miaxis.face.constant.Constants;
+import com.miaxis.face.view.custom.AlertDialog;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;
@@ -49,5 +56,25 @@ public class MyUtil {
             e.printStackTrace();
         }
         return serial;
+    }
+
+    public static Version getCurVersion(Context context) {
+        try {
+            Version v = new Version();
+            PackageManager manager = context.getPackageManager();
+            PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
+            v.setVersionCode(info.versionCode);
+            v.setVersion(info.versionName);
+            return v;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static void alert(FragmentManager manager, String content) {
+        AlertDialog dialog = new AlertDialog();
+        dialog.setAdContent(content);
+        dialog.show(manager, "ALERT");
     }
 }

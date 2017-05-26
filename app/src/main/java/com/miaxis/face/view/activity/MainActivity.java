@@ -35,6 +35,7 @@ import com.miaxis.face.bean.Config;
 import com.miaxis.face.bean.Record;
 import com.miaxis.face.constant.Constants;
 import com.miaxis.face.event.DrawRectEvent;
+import com.miaxis.face.event.HasCardEvent;
 import com.miaxis.face.event.NoCardEvent;
 import com.miaxis.face.event.ResultEvent;
 import com.miaxis.face.event.TimeChangeEvent;
@@ -92,6 +93,9 @@ import static com.miaxis.face.constant.Constants.mFingerDataSize;
 import static com.miaxis.face.constant.Constants.zoomRate;
 
 public class MainActivity extends BaseActivity implements SurfaceHolder.Callback, Camera.PreviewCallback, AMapLocationListener, WeatherSearch.OnWeatherSearchListener {
+
+    long at1;
+    long at2;
 
     @BindView(R.id.tv_title)
     TextView tvTitle;
@@ -424,6 +428,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     }
 
     private boolean readIdFlag = true;
+    private boolean noCardFlag = false;
 
     class ReadIdThread extends Thread {
         @Override
@@ -444,6 +449,9 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                 re = idCardDriver.mxReadCardId(curCardId);
                 switch (re) {
                     case GET_CARD_ID:
+                        eventBus.post(new HasCardEvent());
+                        at1 = System.currentTimeMillis();
+                        noCardFlag = false;
                         openLed();
                         if (!Arrays.equals(lastCardId, curCardId)) {
                             detectFlag = true;
@@ -456,7 +464,10 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                         lastCardId = curCardId;
                         break;
                     case NO_CARD:
-                        eventBus.post(new NoCardEvent());
+                        if (!noCardFlag) {
+                            eventBus.post(new NoCardEvent());
+                        }
+                        noCardFlag = true;
                         lastCardId = null;
                         break;
                 }
@@ -679,6 +690,8 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             float[] fScore = new float[1];
             re = mxFaceAPI.mxFeatureMatch(idFaceFeature, curFaceFeature, fScore);
             if (re == 0 && fScore[0] >= PASS_SCORE) {
+                at2 = System.currentTimeMillis();
+                Log.e("------", "" + (at2 - at1));
                 Log.e("预读___", "验证通过 " + re + " _" + fScore[0]);
                 mRecord.setFaceImg(MyUtil.getYUVBase64(curCameraImg, mCamera.getParameters().getPreviewFormat()));
                 matchFlag = false;
@@ -711,9 +724,6 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                 record.setStatus("失败");
                 playSound(2);
                 break;
-            case ResultEvent.ID_PHOTO:
-                tvPass.setVisibility(View.GONE);
-                return;
             default:
                 return;
         }
@@ -725,7 +735,9 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         record.setLatitude(latitude + "");
         record.setLongitude(longitude + "");
         recordDao.insert(record);
-        UpLoadRecordService.startActionFoo(this, record, config);
+        if (config.isNetFlag()) {
+            UpLoadRecordService.startActionFoo(this, record, config);
+        }
     }
 
     /* 处理 时间变化 事件， 实时更新时间*/
@@ -776,7 +788,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onNoCardEvent(NoCardEvent e) {
         tvPass.setVisibility(View.VISIBLE);
         detectFlag = false;
@@ -784,10 +796,12 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         matchFlag = false;
         idFaceFeature = null;
         curFaceFeature = null;
-        Log.e("onNoCardEvent", "mRecord = null");
         onRect(new DrawRectEvent(0, null));
         closeLed();
     }
 
-
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onHasCardEvent(HasCardEvent e) {
+        tvPass.setVisibility(View.GONE);
+    }
 }

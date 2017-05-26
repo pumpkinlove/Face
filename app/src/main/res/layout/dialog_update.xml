@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="5dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="35dp">
+
+        <TextView
+            android:background="@color/blue_band_dark"
+            android:textColor="@color/white"
+            android:paddingStart="10dp"
+            android:text="升级"
+            android:textSize="15sp"
+            android:gravity="start|center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+    <View
+        android:background="@color/gray_light"
+        android:layout_width="match_parent"
+        android:layout_height="1px"/>
+
+    <LinearLayout
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="140dp">
+        
+        <TextView
+            android:id="@+id/ud_content"
+            android:text="发现新版本， 是否立刻升级？"
+            android:textSize="15sp"
+            android:textColor="@color/dark"
+            android:gravity="center"
+            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
+
+        <android.support.v4.widget.ContentLoadingProgressBar
+            android:visibility="gone"
+            android:layout_weight="1"
+            android:id="@+id/pb_update"
+            android:progressDrawable="@drawable/progress_bar"
+            android:max="100"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
+
+    </LinearLayout>
+
+    <View
+        android:background="@color/gray_light"
+        android:layout_width="match_parent"
+        android:layout_height="1px"/>
+
+    <LinearLayout
+        android:id="@+id/ll_ud_bottom"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="45dp">
+
+        <TextView
+            android:textColor="@color/blue_band_dark"
+            android:textSize="15sp"
+            android:gravity="center"
+            android:text="下次再说"
+            android:background="@color/white"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/ud_cancel" />
+
+        <View
+            android:background="@color/gray_light"
+            android:layout_width="1px"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:textColor="@color/blue_band_dark"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:text="立刻升级"
+            android:background="@color/white"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/ud_confirm" />
+
+    </LinearLayout>
+
+</LinearLayout>
