@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -119,6 +120,8 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     int white;
     @BindView(R.id.tv_pass)
     TextView tvPass;
+    @BindView(R.id.iv_record)
+    ImageView ivRecord;
 
     private Record mRecord;
 
@@ -320,6 +323,11 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     protected void onResume() {
         super.onResume();
         config = Face_App.getConfig();
+        if (config.isQueryFlag()) {
+            ivRecord.setVisibility(View.VISIBLE);
+        } else {
+            ivRecord.setVisibility(View.GONE);
+        }
         monitorFlag = true;
         readIdFlag = true;
     }
@@ -803,5 +811,10 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onHasCardEvent(HasCardEvent e) {
         tvPass.setVisibility(View.GONE);
+    }
+
+    @OnClick(R.id.iv_record)
+    void onRecord() {
+        startActivity(new Intent(this, RecordActivity.class));
     }
 }

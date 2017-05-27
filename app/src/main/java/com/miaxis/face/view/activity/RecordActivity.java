@@ -1,7 +1,6 @@
 package com.miaxis.face.view.activity;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -18,7 +17,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class RecordActivity extends AppCompatActivity {
+public class RecordActivity extends BaseActivity {
 
     @BindView(R.id.btn_last)
     Button btnLast;
@@ -43,6 +42,7 @@ public class RecordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record);
         ButterKnife.bind(this);
+        initWindow();
 
         recordDao = Face_App.getRecordDao();
         total = recordDao.count();
@@ -50,6 +50,7 @@ public class RecordActivity extends AppCompatActivity {
         recordList = recordDao.queryBuilder().offset(curPage * PAGE_SIZE).limit(PAGE_SIZE).orderAsc(RecordDao.Properties.Id).list();
         adapter = new RecordAdapter(recordList, this);
         lvRecord.setAdapter(adapter);
+        tvPage.setText(curPage+"");
     }
 
     @OnClick(R.id.btn_next)
@@ -64,6 +65,11 @@ public class RecordActivity extends AppCompatActivity {
         if (curPage > 1)
             curPage --;
         loadRecord();
+    }
+
+    @OnClick(R.id.btn_back)
+    void onBack() {
+        finish();
     }
 
     private void loadRecord() {

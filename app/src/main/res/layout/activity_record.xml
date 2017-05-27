@@ -43,9 +43,96 @@
 
     </LinearLayout>
 
+    <View
+        android:background="#000"
+        android:layout_width="match_parent"
+        android:layout_height="1px"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <TextView
+            android:textStyle="bold"
+            android:text="姓名"
+            style="@style/record_item"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <View
+            android:background="#000"
+            android:layout_width="1px"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:textStyle="bold"
+            android:text="身份证号码"
+            style="@style/record_item"
+            android:layout_weight="1.5"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <View
+            android:background="#000"
+            android:layout_width="1px"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:textStyle="bold"
+            android:text="比对结果"
+            style="@style/record_item"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <View
+            android:background="#000"
+            android:layout_width="1px"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:textStyle="bold"
+            android:text="机构名称"
+            style="@style/record_item"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <View
+            android:background="#000"
+            android:layout_width="1px"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:textStyle="bold"
+            android:text="比对时间"
+            style="@style/record_item"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+    <View
+        android:background="#000"
+        android:layout_width="match_parent"
+        android:layout_height="1px"/>
+
     <ListView
         android:id="@+id/lv_record"
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></ListView>
+        android:layout_height="0dp">
+
+    </ListView>
+
+    <Button
+        android:layout_gravity="right"
+        android:id="@+id/btn_back"
+        android:text="返回"
+        android:layout_margin="10dp"
+        android:layout_width="200dp"
+        android:layout_height="50dp" />
 
 </LinearLayout>

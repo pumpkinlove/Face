@@ -12,6 +12,7 @@ import com.miaxis.face.R;
 import com.miaxis.face.bean.Record;
 
 import java.util.List;
+import java.util.zip.Inflater;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,10 +25,12 @@ public class RecordAdapter extends BaseAdapter {
 
     private List<Record> recordList;
     private Context context;
+    private LayoutInflater inflater;
 
     public RecordAdapter(List<Record> recordList, Context context) {
         this.recordList = recordList;
         this.context = context;
+        inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     public void setRecordList(List<Record> recordList) {
@@ -53,7 +56,7 @@ public class RecordAdapter extends BaseAdapter {
     public View getView(int i, View convertView, ViewGroup parent) {
         ViewHolder holder = null;
         if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.item_record, null);
+            convertView = inflater.inflate(R.layout.item_record, null);
             holder = new ViewHolder(convertView);
             //根据自定义的Item布局加载布局
             holder.tvName = (TextView) convertView.findViewById(R.id.tv_name);

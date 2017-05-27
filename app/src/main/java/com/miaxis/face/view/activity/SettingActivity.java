@@ -242,10 +242,9 @@ public class SettingActivity extends BaseActivity {
 
     @OnClick(R.id.btn_exit)
     void singOut() {
-        startActivity(new Intent(this, RecordActivity.class));
-//        setResult(Constants.RESULT_CODE_FINISH);
-//        finish();
-//        throw new RuntimeException();
+        setResult(Constants.RESULT_CODE_FINISH);
+        finish();
+        throw new RuntimeException();
     }
 
 }
