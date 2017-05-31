@@ -47,7 +47,7 @@ public class RecordActivity extends BaseActivity {
         recordDao = Face_App.getRecordDao();
         total = recordDao.count();
         pageNum = (total % PAGE_SIZE == 0) ? total / PAGE_SIZE : (total / PAGE_SIZE + 1);
-        recordList = recordDao.queryBuilder().offset(curPage * PAGE_SIZE).limit(PAGE_SIZE).orderAsc(RecordDao.Properties.Id).list();
+        recordList = recordDao.queryBuilder().offset((curPage - 1) * PAGE_SIZE).limit(PAGE_SIZE).orderDesc(RecordDao.Properties.Id).list();
         adapter = new RecordAdapter(recordList, this);
         lvRecord.setAdapter(adapter);
         tvPage.setText(curPage+"");
@@ -55,7 +55,7 @@ public class RecordActivity extends BaseActivity {
 
     @OnClick(R.id.btn_next)
     void onNextPate() {
-        if (curPage < total)
+        if (curPage < pageNum)
             curPage ++;
         loadRecord();
     }
@@ -74,7 +74,7 @@ public class RecordActivity extends BaseActivity {
 
     private void loadRecord() {
         tvPage.setText(curPage + "");
-        recordList = recordDao.queryBuilder().offset(curPage * PAGE_SIZE).limit(PAGE_SIZE).orderAsc(RecordDao.Properties.Id).list();
+        recordList = recordDao.queryBuilder().offset((curPage - 1) * PAGE_SIZE).limit(PAGE_SIZE).orderDesc(RecordDao.Properties.Id).list();
         adapter.setRecordList(recordList);
         adapter.notifyDataSetChanged();
     }

@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.miaxis.face.util.FileUtil;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by xu.nan on 2017/5/24.
@@ -30,7 +31,19 @@ public class GreenDaoContext extends ContextWrapper {
     @Override
     public File getDatabasePath(String dbName) {
         String path = FileUtil.getAvailablePath(this);
-        return new File(path + File.separator + dbName);
+        File f = new File(path + File.separator + dbName);
+        File dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        if (!f.exists()) {
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return f;
     }
 
     /**

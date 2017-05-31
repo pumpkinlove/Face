@@ -39,6 +39,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -139,10 +141,11 @@ public class UpdateDialog extends DialogFragment {
 
     private void handleActionFoo() {
         Config config = Face_App.getConfig();
-
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://" + config.getIp() + ":" + config.getPort() + "/")
                 .addConverterFactory(GsonConverterFactory.create())
+                .callbackExecutor(executorService)
                 .build();
         UpdateVersion uv = retrofit.create(UpdateVersion.class);
         String url = "http://"+ config.getIp() + ":" + config.getPort() + "/" + Constants.PROJECT_NAME + "/" + Constants.DOWN_VERSION;
@@ -150,25 +153,7 @@ public class UpdateDialog extends DialogFragment {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                File futureStudioIconFile = new File(FileUtil.FACE_MAIN_PATH, getResources().getString(R.string.app_name) + ".apk");
-                try {
-                    InputStream is = response.body().byteStream();
-                    long totalLength = is.available();
-                    FileOutputStream fos = new FileOutputStream(futureStudioIconFile);
-                    BufferedInputStream bis = new BufferedInputStream(is);
-                    byte[] buffer = new byte[1024];
-                    int len;
-                    while ((len = bis.read(buffer)) != -1) {
-                        fos.write(buffer, 0, len);
-                        Log.e("============", len + "/" + totalLength);
-                    }
-                    fos.flush();
-                    fos.close();
-                    bis.close();
-                    is.close();
-                } catch (IOException e) {
-                } finally {
-                }
+                writeResponseBodyToDisk(response.body());
             }
 
             @Override
@@ -179,22 +164,27 @@ public class UpdateDialog extends DialogFragment {
     }
 
     private void writeResponseBodyToDisk(ResponseBody body) {
-        File futureStudioIconFile = new File(FileUtil.FACE_MAIN_PATH, getResources().getString(R.string.app_name) + ".apk");
+        File apk = new File(FileUtil.FACE_MAIN_PATH, getResources().getString(R.string.app_name) + ".apk");
         try {
             InputStream is = body.byteStream();
-            long totalLength = is.available();
-            FileOutputStream fos = new FileOutputStream(futureStudioIconFile);
+            long totalLength = body.contentLength();
+            pbUpdate.setMax(2753607);
+            FileOutputStream fos = new FileOutputStream(apk);
             BufferedInputStream bis = new BufferedInputStream(is);
             byte[] buffer = new byte[1024];
+            int cur = 0;
             int len;
             while ((len = bis.read(buffer)) != -1) {
                 fos.write(buffer, 0, len);
-                Log.e("============", len + "/" + totalLength);
+                cur += len;
+                Log.e(cur + "", totalLength + "");
+                pbUpdate.setProgress(cur);
             }
             fos.flush();
             fos.close();
             bis.close();
             is.close();
+            EventBus.getDefault().post(apk);
         } catch (IOException e) {
         } finally {
         }

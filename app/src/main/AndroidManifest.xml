@@ -63,7 +63,7 @@
         </activity>
         <activity
             android:name=".view.activity.SettingActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden" />
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity android:name=".view.activity.MainActivity" />
         <activity android:name=".view.activity.TestActivity" />
 

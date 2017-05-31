@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import butterknife.OnClick;
 import cn.cloudwalk.sdk.ConStant;
 
 /**
@@ -73,7 +74,8 @@ public class Face_App extends Application {
 
     void initCW() {
         if (!readLicence()) {
-            eventBus.post(new InitCWEvent(InitCWEvent.ERR_LICENCE));
+            eventBus.postSticky(new InitCWEvent(InitCWEvent.ERR_LICENCE));
+            return;
         }
         new Thread(new Runnable() {
             @Override
@@ -178,8 +180,8 @@ public class Face_App extends Application {
         for (int i = 0; i < page; i ++) {
             List<Record> recordList = recordDao.queryBuilder().offset(i * 100).limit(GROUP_SIZE).orderAsc(RecordDao.Properties.Id).list();
             for (Record record : recordList) {
-                Log.e("UpLoad", "===========  " + record.getName());
                 if (!record.isHasUp()) {
+                    Log.e("UpLoad", "===========  " + record.getName());
                     UpLoadRecordService.startActionFoo(getApplicationContext(), record, config);
                 }
             }

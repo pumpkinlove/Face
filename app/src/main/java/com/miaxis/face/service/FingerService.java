@@ -45,6 +45,7 @@ public class FingerService extends IntentService {
     public void onStart(@Nullable Intent intent, int startId) {
         super.onStart(intent, startId);
         fingerDriver = new MXFingerDriver(getApplicationContext(), pid, vid);
+        EventBus.getDefault().register(this);
     }
 
     public static void startActionFinger(Context context, Record record) {
@@ -91,4 +92,15 @@ public class FingerService extends IntentService {
         EventBus.getDefault().post(new ResultEvent(ResultEvent.FAIL, record));
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNoCardEvent(NoCardEvent e) {
+        Log.e("===", "cancel");
+        fingerDriver.mxCancelGetImage();
+    }
+
+    @Override
+    public void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
+    }
 }

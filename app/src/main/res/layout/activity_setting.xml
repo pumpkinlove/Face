@@ -570,7 +570,7 @@
                         android:textColor="@color/dark"
                         android:gravity="center"
                         android:textSize="24sp"
-                        android:text="本地记录数目"
+                        android:text="比对数目 （未上传数目 / 总数）"
                         android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="match_parent" />

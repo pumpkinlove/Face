@@ -295,7 +295,10 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             pFaceBuffer[i] = new MXFaceInfo();
         }
         byte[] rotateData = YuvUtil.rotateYUV420Degree180(data, PRE_WIDTH, PRE_HEIGHT);
-        int re = mxFaceAPI.mxDetectFaceYUV(rotateData, PRE_WIDTH, PRE_HEIGHT, pFaceNum, pFaceBuffer);
+        int re;
+        synchronized (lock2) {
+            re = mxFaceAPI.mxDetectFaceYUV(rotateData, PRE_WIDTH, PRE_HEIGHT, pFaceNum, pFaceBuffer);
+        }
         if (re == 0 && pFaceNum[0] > 0) {
             eventBus.post(new DrawRectEvent(pFaceNum[0], pFaceBuffer));
             if (!isExtractWorking && extractFlag) {
@@ -328,6 +331,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         } else {
             ivRecord.setVisibility(View.GONE);
         }
+        tvWelMsg.setText(config.getBanner());
         monitorFlag = true;
         readIdFlag = true;
     }
@@ -344,11 +348,6 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         super.onDestroy();
         eventBus.unregister(this);
         unregisterReceiver(timeReceiver);
-    }
-
-    @OnClick(R.id.tv_title)
-    void onTestClick() {
-        startActivityForResult(new Intent(this, SettingActivity.class), 1);
     }
 
     /* 画人脸框 */
@@ -644,7 +643,8 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
 
     }
 
-    private Byte lock1 = 1;
+    private final Byte lock1 = 1;
+    private final Byte lock2 = 2;
 
     byte[] extractFeature(MXFaceInfo faceInfo) {
         synchronized (lock1) {
@@ -687,7 +687,9 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         pFaceBuffer[0] = new MXFaceInfo();
         int iX = oX[0];
         int iY = oY[0];
-        re = mxFaceAPI.mxDetectFace(pGrayBuff, iX, iY, pFaceNum, pFaceBuffer);
+        synchronized (lock2) {
+            re = mxFaceAPI.mxDetectFace(pGrayBuff, iX, iY, pFaceNum, pFaceBuffer);
+        }
         if (re != 0) {
             return;
         }
@@ -816,5 +818,24 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     @OnClick(R.id.iv_record)
     void onRecord() {
         startActivity(new Intent(this, RecordActivity.class));
+    }
+
+    private int mState = 0;
+    private long firstTime = 0;
+
+    @OnClick(R.id.tv_title)
+    void onTitleClick(View view) {
+        long secondTime = System.currentTimeMillis();
+        if ((secondTime - firstTime) > 1500) {
+            mState = 0;
+        } else {
+            mState ++;
+        }
+        firstTime = secondTime;
+        Log.e("mState", mState+"");
+        if (mState > 4) {
+            mState = 0;
+            startActivity(new Intent(this, SettingActivity.class));
+        }
     }
 }
