@@ -36,6 +36,38 @@
         android:layout_height="40dp"
         android:src="?android:attr/actionModePasteDrawable" />
 
+    <EditText
+        android:gravity="center"
+        android:layout_margin="15dp"
+        android:visibility="gone"
+        android:id="@+id/et_pwd"
+        android:digits="0123456789"
+        android:background="@color/white"
+        android:inputType="numberPassword"
+        android:layout_weight="1.8"
+        android:layout_width="0dp"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        android:id="@+id/btn_confirm"
+        android:text="确定"
+        android:textColor="@color/white"
+        android:layout_weight="0.6"
+        android:layout_width="0dp"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        android:id="@+id/btn_cancel"
+        android:text="取消"
+        android:textColor="@color/white"
+        android:layout_weight="0.6"
+        android:layout_width="0dp"
+        android:layout_height="match_parent" />
+
     <TextView
         android:id="@+id/tv_wel_msg"
         android:textSize="24sp"

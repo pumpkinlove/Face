@@ -1,6 +1,9 @@
 package com.miaxis.face.view.activity;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -16,6 +19,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnItemClick;
 
 public class RecordActivity extends BaseActivity {
 
@@ -32,7 +36,7 @@ public class RecordActivity extends BaseActivity {
     private int curPage = 1;
     private RecordAdapter adapter;
 
-    private static final int PAGE_SIZE = 20;
+    private static final int PAGE_SIZE = 10;
     private RecordDao recordDao;
     private long total;
     private long pageNum;
@@ -55,16 +59,18 @@ public class RecordActivity extends BaseActivity {
 
     @OnClick(R.id.btn_next)
     void onNextPate() {
-        if (curPage < pageNum)
+        if (curPage < pageNum) {
             curPage ++;
-        loadRecord();
+            loadRecord();
+        }
     }
 
     @OnClick(R.id.btn_last)
     void onLastPage() {
-        if (curPage > 1)
+        if (curPage > 1) {
             curPage --;
-        loadRecord();
+            loadRecord();
+        }
     }
 
     @OnClick(R.id.btn_back)
@@ -82,5 +88,11 @@ public class RecordActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @OnItemClick(R.id.lv_record)
+    void onRecordClicked(int position) {
+        Record re = recordList.get(position);
+        Log.e("====", re.getName());
     }
 }

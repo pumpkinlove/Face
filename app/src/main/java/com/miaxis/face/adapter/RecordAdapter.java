@@ -25,12 +25,10 @@ public class RecordAdapter extends BaseAdapter {
 
     private List<Record> recordList;
     private Context context;
-    private LayoutInflater inflater;
 
     public RecordAdapter(List<Record> recordList, Context context) {
         this.recordList = recordList;
         this.context = context;
-        inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     public void setRecordList(List<Record> recordList) {
@@ -56,15 +54,8 @@ public class RecordAdapter extends BaseAdapter {
     public View getView(int i, View convertView, ViewGroup parent) {
         ViewHolder holder = null;
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.item_record, null);
+            convertView = LayoutInflater.from(context).inflate(R.layout.item_record, null);
             holder = new ViewHolder(convertView);
-            //根据自定义的Item布局加载布局
-            holder.tvName = (TextView) convertView.findViewById(R.id.tv_name);
-            holder.tvCardNo = (TextView) convertView.findViewById(R.id.tv_cardNo);
-            holder.tvOrg = (TextView) convertView.findViewById(R.id.tv_org);
-            holder.tvResult = (TextView) convertView.findViewById(R.id.tv_result);
-            holder.tvOpdate = (TextView) convertView.findViewById(R.id.tv_opdate);
-            //将设置好的布局保存到缓存中，并将其设置在Tag里，以便后面方便取出Tag
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder)convertView.getTag();

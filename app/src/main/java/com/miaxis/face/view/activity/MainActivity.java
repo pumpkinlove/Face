@@ -17,9 +17,12 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -122,6 +125,12 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     TextView tvPass;
     @BindView(R.id.iv_record)
     ImageView ivRecord;
+    @BindView(R.id.et_pwd)
+    EditText etPwd;
+    @BindView(R.id.btn_confirm)
+    Button btnConfirm;
+    @BindView(R.id.btn_cancel)
+    Button btnCancel;
 
     private Record mRecord;
 
@@ -329,7 +338,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         if (config.isQueryFlag()) {
             ivRecord.setVisibility(View.VISIBLE);
         } else {
-            ivRecord.setVisibility(View.GONE);
+            ivRecord.setVisibility(View.INVISIBLE);
         }
         tvWelMsg.setText(config.getBanner());
         monitorFlag = true;
@@ -817,7 +826,11 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
 
     @OnClick(R.id.iv_record)
     void onRecord() {
-        startActivity(new Intent(this, RecordActivity.class));
+        toType = 1;
+        etPwd.setVisibility(View.VISIBLE);
+        btnCancel.setVisibility(View.VISIBLE);
+        btnConfirm.setVisibility(View.VISIBLE);
+        tvWelMsg.setVisibility(View.GONE);
     }
 
     private int mState = 0;
@@ -829,13 +842,50 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         if ((secondTime - firstTime) > 1500) {
             mState = 0;
         } else {
-            mState ++;
+            mState++;
         }
         firstTime = secondTime;
-        Log.e("mState", mState+"");
+        Log.e("mState", mState + "");
         if (mState > 4) {
-            mState = 0;
-            startActivity(new Intent(this, SettingActivity.class));
+            toType = 0;
+            etPwd.setVisibility(View.VISIBLE);
+            btnCancel.setVisibility(View.VISIBLE);
+            btnConfirm.setVisibility(View.VISIBLE);
+            tvWelMsg.setVisibility(View.GONE);
+        } else {
+            onCancel();
+        }
+    }
+
+    private int toType;             // 0 SettingActivity   1 RecordActivity
+
+    @OnClick(R.id.btn_cancel)
+    void onCancel() {
+        etPwd.setText(null);
+        etPwd.setVisibility(View.GONE);
+        btnCancel.setVisibility(View.GONE);
+        btnConfirm.setVisibility(View.GONE);
+        tvWelMsg.setVisibility(View.VISIBLE);
+    }
+
+    @OnClick(R.id.btn_confirm)
+    void onConfirm() {
+        String pwd = etPwd.getText().toString();
+        if (pwd.equals(config.getPassword())) {
+            etPwd.setText(null);
+            etPwd.setVisibility(View.GONE);
+            btnCancel.setVisibility(View.GONE);
+            btnConfirm.setVisibility(View.GONE);
+            tvWelMsg.setVisibility(View.VISIBLE);
+            if (toType == 0) {
+                startActivity(new Intent(this, SettingActivity.class));
+            } else if (toType == 1) {
+                startActivity(new Intent(this, RecordActivity.class));
+            }
+
+        } else {
+            Toast.makeText(this, "密码错误", Toast.LENGTH_SHORT).show();
+            etPwd.setText(null);
         }
     }
 }

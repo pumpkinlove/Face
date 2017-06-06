@@ -1,16 +1,8 @@
 package com.miaxis.face.view.activity;
 
 import android.app.TimePickerDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Process;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -23,7 +15,6 @@ import com.miaxis.face.R;
 import com.miaxis.face.app.Face_App;
 import com.miaxis.face.bean.AjaxResponse;
 import com.miaxis.face.bean.Config;
-import com.miaxis.face.bean.Record;
 import com.miaxis.face.bean.Version;
 import com.miaxis.face.constant.Constants;
 import com.miaxis.face.event.TimerResetEvent;
@@ -34,7 +25,6 @@ import com.miaxis.face.util.MyUtil;
 import com.miaxis.face.view.custom.UpdateDialog;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.greendao.query.WhereCondition;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -93,6 +83,8 @@ public class SettingActivity extends BaseActivity {
     Button btnUpdate;
     @BindView(R.id.btn_exit)
     Button btnExit;
+    @BindView(R.id.et_pwd)
+    EditText etPwd;
 
     private Config config;
     private UpdateDialog updateDialog;
@@ -109,12 +101,12 @@ public class SettingActivity extends BaseActivity {
 
     void initView() {
         etIp.setText(config.getIp());
-        etPort.setText(config.getPort()+"");
+        etPort.setText(config.getPort() + "");
         etBanner.setText(config.getBanner());
-        etPassScore.setText(config.getPassScore()+"");
+        etPassScore.setText(config.getPassScore() + "");
         etOrg.setText(config.getOrgName());
         tvSelectTime.setText(config.getUpTime());
-        etMonitorInterval.setText(config.getIntervalTime()+"");
+        etMonitorInterval.setText(config.getIntervalTime() + "");
         tvVersion.setText(MyUtil.getCurVersion(this).getVersion());
         if (config.getFingerFlag()) {
             rbFingerOn.setChecked(true);
@@ -135,6 +127,7 @@ public class SettingActivity extends BaseActivity {
         long notUpCount = recordDao.queryBuilder().where(RecordDao.Properties.HasUp.eq(false)).count();
         long count = recordDao.count();
         tvResultCount.setText(notUpCount + " / " + count);
+        etPwd.setText(config.getPassword());
 
         updateDialog = new UpdateDialog();
         updateDialog.setContext(this);
@@ -195,18 +188,6 @@ public class SettingActivity extends BaseActivity {
     @OnClick(R.id.btn_cancel_config)
     void cancel() {
         finish();
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                RecordDao recordDao = Face_App.getRecordDao();
-//                Record r = recordDao.load(1L);
-//                for (Long i=0L; i<50000L; i++) {
-//                    r.setId(100L + i);
-//                    recordDao.insert(r);
-//                    Log.e("=====", i + " / " + 50000);
-//                }
-//            }
-//        }).start();
     }
 
     @OnClick(R.id.btn_clear_now)
@@ -241,9 +222,9 @@ public class SettingActivity extends BaseActivity {
                         lastVersion = g.fromJson(g.toJson(response.getData()), Version.class);
                     }
                     Version curVersion = MyUtil.getCurVersion(getApplicationContext());
-                    if (lastVersion.getVersionCode() > curVersion.getVersionCode() ) {
+                    if (lastVersion.getVersionCode() > curVersion.getVersionCode()) {
                         updateDialog.setLastVersion(lastVersion);
-                        updateDialog.show(getFragmentManager(),"update_dialog");
+                        updateDialog.show(getFragmentManager(), "update_dialog");
                     } else {
                         MyUtil.alert(getFragmentManager(), "您已经是最新版了！");
                     }
@@ -265,17 +246,6 @@ public class SettingActivity extends BaseActivity {
         setResult(Constants.RESULT_CODE_FINISH);
         finish();
         throw new RuntimeException();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        InputMethodManager manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        if(event.getAction() == MotionEvent.ACTION_DOWN){
-            if(getCurrentFocus()!=null && getCurrentFocus().getWindowToken()!=null){
-                manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-            }
-        }
-        return super.onTouchEvent(event);
     }
 
 }

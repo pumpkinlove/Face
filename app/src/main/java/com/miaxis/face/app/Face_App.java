@@ -37,6 +37,8 @@ import java.util.TimerTask;
 import butterknife.OnClick;
 import cn.cloudwalk.sdk.ConStant;
 
+import static com.miaxis.face.constant.Constants.MAX_COUNT;
+
 /**
  * Created by Administrator on 2017/5/16 0016.
  */
@@ -113,6 +115,7 @@ public class Face_App extends Application {
             config.setFingerFlag(Constants.DEFAULT_FINGER);
             config.setNetFlag(Constants.DEFAULT_NET);
             config.setQueryFlag(Constants.DEFAULT_NET);
+            config.setPassword(Constants.DEFAULT_PASSWORD);
             configDao.insert(config);
         }
     }
@@ -176,9 +179,12 @@ public class Face_App extends Application {
 
     private void upLoad() {
         long count = recordDao.count();
+        if (count > MAX_COUNT) {
+            clearData();
+        }
         long page = (count % GROUP_SIZE == 0) ? count / GROUP_SIZE : (count / GROUP_SIZE + 1);
         for (int i = 0; i < page; i ++) {
-            List<Record> recordList = recordDao.queryBuilder().offset(i * 100).limit(GROUP_SIZE).orderAsc(RecordDao.Properties.Id).list();
+            List<Record> recordList = recordDao.queryBuilder().offset(i * GROUP_SIZE).limit(GROUP_SIZE).orderAsc(RecordDao.Properties.Id).list();
             for (Record record : recordList) {
                 if (!record.isHasUp()) {
                     Log.e("UpLoad", "===========  " + record.getName());
@@ -186,6 +192,10 @@ public class Face_App extends Application {
                 }
             }
         }
+    }
+
+    private void clearData() {
+
     }
 
     private void startTask() {

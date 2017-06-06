@@ -694,6 +694,55 @@
                     android:layout_width="match_parent"
                     android:layout_height="1px"/>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp">
+
+                    <View
+                        android:background="@color/gray_dark"
+                        android:layout_width="1px"
+                        android:layout_height="match_parent"/>
+
+                    <TextView
+                        android:textColor="@color/dark"
+                        android:gravity="center"
+                        android:textSize="24sp"
+                        android:text="密码"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent" />
+
+                    <View
+                        android:background="@color/gray_dark"
+                        android:layout_width="1px"
+                        android:layout_height="match_parent"/>
+
+                    <EditText
+                        android:background="@color/white"
+                        android:textColor="@color/dark"
+                        android:gravity="center"
+                        android:textSize="24sp"
+                        android:digits="0123456789"
+                        android:inputType="number"
+                        android:maxLength="6"
+                        android:singleLine="true"
+                        android:id="@+id/et_pwd"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent" />
+
+                    <View
+                        android:background="@color/gray_dark"
+                        android:layout_width="1px"
+                        android:layout_height="match_parent"/>
+
+                </LinearLayout>
+
+                <View
+                    android:background="@color/gray_dark"
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"/>
+
             </LinearLayout>
 
         </ScrollView>

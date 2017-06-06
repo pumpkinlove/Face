@@ -27,11 +27,13 @@ public class Config implements Serializable {
     private boolean fingerFlag;
     private boolean netFlag;
     private boolean queryFlag;
+    private String password;
 
-    @Generated(hash = 1607863072)
+    @Generated(hash = 358730395)
     public Config(long id, String ip, int port, String upTime, float passScore,
             String banner, int intervalTime, String orgId, String orgName,
-            boolean fingerFlag, boolean netFlag, boolean queryFlag) {
+            boolean fingerFlag, boolean netFlag, boolean queryFlag,
+            String password) {
         this.id = id;
         this.ip = ip;
         this.port = port;
@@ -44,6 +46,7 @@ public class Config implements Serializable {
         this.fingerFlag = fingerFlag;
         this.netFlag = netFlag;
         this.queryFlag = queryFlag;
+        this.password = password;
     }
 
     @Generated(hash = 589037648)
@@ -156,5 +159,13 @@ public class Config implements Serializable {
 
     public boolean getQueryFlag() {
         return this.queryFlag;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

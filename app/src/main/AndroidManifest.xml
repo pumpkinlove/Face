@@ -64,7 +64,8 @@
         <activity
             android:name=".view.activity.SettingActivity"
             android:windowSoftInputMode="adjustResize|stateHidden" />
-        <activity android:name=".view.activity.MainActivity" />
+        <activity android:name=".view.activity.MainActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"/>
         <activity android:name=".view.activity.TestActivity" />
 
         <service

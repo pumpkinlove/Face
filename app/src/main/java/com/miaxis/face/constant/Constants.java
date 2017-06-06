@@ -39,6 +39,7 @@ public class Constants {
     public static final int mFingerDataSize    = 512;          // 指纹数据长度
     public static final int mFingerDataB64Size = 684;          // 指纹数据Base64编码后的长度
 
+    public static final int MAX_COUNT = 40000;
     public static final String DEFAULT_IP = "183.129.171.153";
     public static final int DEFAULT_PORT = 9200;
     public static final String DEFAULT_UPTIME = "3 : 00";
@@ -48,6 +49,7 @@ public class Constants {
     public static final boolean DEFAULT_QUERY = false;
     public static final int DEFAULT_INTERVAL = 3;
     public static final String DEFAULT_BANNER = "";
+    public static final String DEFAULT_PASSWORD = "666666";
 
     public static final String PROJECT_NAME = "faceid";
     public static final String CHECK_VERSION = "app/getAppInfo";
