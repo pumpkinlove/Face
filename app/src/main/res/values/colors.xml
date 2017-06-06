@@ -19,4 +19,8 @@
     <color name="blue_band_light2">#61b9bc</color>
     <color name="blue_band_dark2">#4d5d6d</color>
     <color name="blue_band_dark3">#9688939e</color>
+
+    <color name="green_dark">#007e00</color>
+    <color name="red">#f00</color>
+k
 </resources>

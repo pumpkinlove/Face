@@ -7,11 +7,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.util.Base64;
-import android.util.Log;
 
 import com.miaxis.face.bean.Version;
 import com.miaxis.face.constant.Constants;
-import com.miaxis.face.view.custom.AlertDialog;
+import com.miaxis.face.view.fragment.AlertDialog;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;

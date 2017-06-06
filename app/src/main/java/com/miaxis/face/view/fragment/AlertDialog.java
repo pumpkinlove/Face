@@ -1,4 +1,4 @@
-package com.miaxis.face.view.custom;
+package com.miaxis.face.view.fragment;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -21,7 +21,7 @@ import butterknife.Unbinder;
  * Created by xu.nan on 2016/10/14.
  */
 
-public class AlertDialog extends DialogFragment {
+public class AlertDialog extends BaseDialogFragment {
 
     @BindView(R.id.tv_ad_content)
     TextView tvAdContent;
@@ -41,6 +41,7 @@ public class AlertDialog extends DialogFragment {
             getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
             dialog.getWindow().setLayout((int) (dm.widthPixels * 0.77), (int) (dm.heightPixels * 0.17));
         }
+        hideNavigationBar();
     }
 
     @Nullable

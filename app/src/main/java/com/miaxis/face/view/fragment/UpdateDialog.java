@@ -1,4 +1,4 @@
-package com.miaxis.face.view.custom;
+package com.miaxis.face.view.fragment;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -56,7 +56,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * Created by xu.nan on 2016/9/12.
  */
-public class UpdateDialog extends DialogFragment {
+public class UpdateDialog extends BaseDialogFragment {
 
     @BindView(R.id.ud_content)
     TextView udContent;
@@ -89,6 +89,7 @@ public class UpdateDialog extends DialogFragment {
             getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
             dialog.getWindow().setLayout((int) (dm.widthPixels * 0.77), ViewGroup.LayoutParams.WRAP_CONTENT);
         }
+        hideNavigationBar();
     }
 
     @Override

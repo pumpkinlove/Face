@@ -746,7 +746,6 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             default:
                 return;
         }
-//        record.setFaceImg(MyUtil.getYUVBase64(curCameraImg, mCamera.getParameters().getPreviewFormat()));
         record.setCreateDate(DateUtil.toAll(new Date()));
         record.setDevsn(MyUtil.getSerialNumber());
         record.setBusEntity(config.getOrgName());

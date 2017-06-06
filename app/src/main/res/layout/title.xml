@@ -41,6 +41,7 @@
         android:layout_margin="15dp"
         android:visibility="gone"
         android:id="@+id/et_pwd"
+        android:maxLength="6"
         android:digits="0123456789"
         android:background="@color/white"
         android:inputType="numberPassword"

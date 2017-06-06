@@ -1,9 +1,6 @@
 package com.miaxis.face.view.activity;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -13,6 +10,7 @@ import com.miaxis.face.adapter.RecordAdapter;
 import com.miaxis.face.app.Face_App;
 import com.miaxis.face.bean.Record;
 import com.miaxis.face.greendao.gen.RecordDao;
+import com.miaxis.face.view.fragment.RecordDialog;
 
 import java.util.List;
 
@@ -40,6 +38,7 @@ public class RecordActivity extends BaseActivity {
     private RecordDao recordDao;
     private long total;
     private long pageNum;
+    private RecordDialog recordDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +54,7 @@ public class RecordActivity extends BaseActivity {
         adapter = new RecordAdapter(recordList, this);
         lvRecord.setAdapter(adapter);
         tvPage.setText(curPage+"");
+        recordDialog = new RecordDialog();
     }
 
     @OnClick(R.id.btn_next)
@@ -93,6 +93,7 @@ public class RecordActivity extends BaseActivity {
     @OnItemClick(R.id.lv_record)
     void onRecordClicked(int position) {
         Record re = recordList.get(position);
-        Log.e("====", re.getName());
+        recordDialog.setRecord(re);
+        recordDialog.show(getFragmentManager(), "RECORD_DIALOG");
     }
 }

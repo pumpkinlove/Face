@@ -9,6 +9,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.miaxis.face.R;
@@ -22,7 +23,7 @@ import com.miaxis.face.greendao.gen.ConfigDao;
 import com.miaxis.face.greendao.gen.RecordDao;
 import com.miaxis.face.net.UpdateVersion;
 import com.miaxis.face.util.MyUtil;
-import com.miaxis.face.view.custom.UpdateDialog;
+import com.miaxis.face.view.fragment.UpdateDialog;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -179,6 +180,11 @@ public class SettingActivity extends BaseActivity {
         config.setUpTime(tvSelectTime.getText().toString());
         config.setIntervalTime(Integer.valueOf(etMonitorInterval.getText().toString()));
         config.setBanner(etBanner.getText().toString());
+        if (etPwd.getText().length() != 6) {
+            Toast.makeText(this, "请填写6位数字密码", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        config.setPassword(etPwd.getText().toString());
         ConfigDao configDao = Face_App.getConfigDao();
         configDao.update(config);
         EventBus.getDefault().post(new TimerResetEvent());
