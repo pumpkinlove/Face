@@ -3,4 +3,16 @@
     <string name="result_success">成 功</string>
     <string name="result_failure">失 败</string>
     <string name="result_press">请按指纹</string>
+
+    <string-array name="sex">
+        <item>-- 性别 --</item>
+        <item>男</item>
+        <item>女</item>
+    </string-array>
+
+    <string-array name="result">
+        <item>-- 比对结果 --</item>
+        <item>成功</item>
+        <item>失败</item>
+    </string-array>
 </resources>

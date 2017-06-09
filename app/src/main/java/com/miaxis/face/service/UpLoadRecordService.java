@@ -12,6 +12,7 @@ import com.miaxis.face.bean.Config;
 import com.miaxis.face.bean.Record;
 import com.miaxis.face.greendao.gen.RecordDao;
 import com.miaxis.face.net.UpLoadRecord;
+import com.miaxis.face.util.DateUtil;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -84,7 +85,7 @@ public class UpLoadRecordService extends IntentService {
                 record.getLocation(),
                 record.getLongitude(),
                 record.getLatitude(),
-                record.getCreateDate(),
+                DateUtil.toAll(record.getCreateDate()),
                 record.getDevsn(),
                 record.getCardId()
                 );

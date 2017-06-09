@@ -2,6 +2,7 @@ package com.miaxis.face.view.activity;
 
 import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,6 +17,7 @@ import com.miaxis.face.R;
 import com.miaxis.face.app.Face_App;
 import com.miaxis.face.bean.AjaxResponse;
 import com.miaxis.face.bean.Config;
+import com.miaxis.face.bean.Record;
 import com.miaxis.face.bean.Version;
 import com.miaxis.face.constant.Constants;
 import com.miaxis.face.event.TimerResetEvent;
@@ -26,6 +28,10 @@ import com.miaxis.face.util.MyUtil;
 import com.miaxis.face.view.fragment.UpdateDialog;
 
 import org.greenrobot.eventbus.EventBus;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -213,7 +219,7 @@ public class SettingActivity extends BaseActivity {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         UpdateVersion uv = retrofit.create(UpdateVersion.class);
-        Call<AjaxResponse> call = uv.checkVerison();
+        Call<AjaxResponse> call = uv.checkVersion();
         call.enqueue(new Callback<AjaxResponse>() {
             @Override
             public void onResponse(Call<AjaxResponse> call, Response<AjaxResponse> rsp) {
@@ -249,7 +255,6 @@ public class SettingActivity extends BaseActivity {
 
     @OnClick(R.id.btn_exit)
     void singOut() {
-        setResult(Constants.RESULT_CODE_FINISH);
         finish();
         throw new RuntimeException();
     }

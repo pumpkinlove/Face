@@ -18,6 +18,7 @@ import com.miaxis.face.greendao.gen.ConfigDao;
 import com.miaxis.face.greendao.gen.DaoMaster;
 import com.miaxis.face.greendao.gen.DaoSession;
 import com.miaxis.face.greendao.gen.RecordDao;
+import com.miaxis.face.service.ClearService;
 import com.miaxis.face.service.UpLoadRecordService;
 import com.miaxis.face.util.FileUtil;
 import com.miaxis.face.util.LogUtil;
@@ -179,9 +180,6 @@ public class Face_App extends Application {
 
     private void upLoad() {
         long count = recordDao.count();
-        if (count > MAX_COUNT) {
-            clearData();
-        }
         long page = (count % GROUP_SIZE == 0) ? count / GROUP_SIZE : (count / GROUP_SIZE + 1);
         for (int i = 0; i < page; i ++) {
             List<Record> recordList = recordDao.queryBuilder().offset(i * GROUP_SIZE).limit(GROUP_SIZE).orderAsc(RecordDao.Properties.Id).list();
@@ -192,6 +190,7 @@ public class Face_App extends Application {
                 }
             }
         }
+
     }
 
     private void clearData() {
@@ -219,6 +218,7 @@ public class Face_App extends Application {
                 if (config.isNetFlag()) {
                     upLoad();
                 }
+                ClearService.startActionClear(getApplicationContext());
             }
         };
     }

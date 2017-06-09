@@ -16,9 +16,10 @@ import retrofit2.http.Url;
 public interface UpdateVersion {
 
     @POST("faceid/app/getAppInfo")
-    Call<AjaxResponse> checkVerison();
+    Call<AjaxResponse> checkVersion();
 
     @Streaming
     @GET
     Call<ResponseBody> downVersion(@Url String url);
+
 }

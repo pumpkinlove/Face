@@ -3,6 +3,7 @@ package com.miaxis.face.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.miaxis.face.R;
@@ -12,11 +13,16 @@ import com.miaxis.face.constant.Constants;
 import com.miaxis.face.net.UpdateVersion;
 import com.miaxis.face.util.FileUtil;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -67,44 +73,52 @@ public class DownVersionService extends IntentService {
      */
     private void handleActionFoo() {
         Config config = Face_App.getConfig();
-
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://" + config.getIp() + ":" + config.getPort() + "/")
+//                .baseUrl("http://" + config.getIp() + ":" + config.getPort() + "/")
+                .baseUrl("http://192.168.6.87:8088/")
                 .addConverterFactory(GsonConverterFactory.create())
+                .callbackExecutor(executorService)
                 .build();
         UpdateVersion uv = retrofit.create(UpdateVersion.class);
-        String url = "http://"+ config.getIp() + ":" + config.getPort() + "/" + Constants.PROJECT_NAME + "/" + Constants.DOWN_VERSION;
+//        String url = "http://192.168.6.67:8080/"+ "CIIPS_A/version/downLoadLastVersion.action";
+        String url = "http://192.168.6.87:8088/"+ Constants.PROJECT_NAME + "/" + Constants.DOWN_VERSION;
+//        String url = "http://" + config.getIp() + ":" + config.getPort() + "/" + Constants.PROJECT_NAME + "/" + Constants.DOWN_VERSION;
         Call<ResponseBody> call = uv.downVersion(url);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.e("onResponse", "");
                 writeResponseBodyToDisk(response.body());
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                Log.e("onFailure", t.getMessage());
             }
         });
     }
 
     private void writeResponseBodyToDisk(ResponseBody body) {
-        File futureStudioIconFile = new File(FileUtil.FACE_MAIN_PATH, getResources().getString(R.string.app_name) + ".apk");
+        File apk = new File(FileUtil.FACE_MAIN_PATH, getResources().getString(R.string.app_name) + ".apk");
         try {
             InputStream is = body.byteStream();
-            long totalLength = is.available();
-            FileOutputStream fos = new FileOutputStream(futureStudioIconFile);
+            long totalLength = body.contentLength();
+            Log.e("available", is.available() + "");
+            FileOutputStream fos = new FileOutputStream(apk);
             BufferedInputStream bis = new BufferedInputStream(is);
             byte[] buffer = new byte[1024];
+            int cur = 0;
             int len;
             while ((len = bis.read(buffer)) != -1) {
                 fos.write(buffer, 0, len);
-                Log.e("============", len + "/" + totalLength);
+                cur += len;
             }
             fos.flush();
             fos.close();
             bis.close();
             is.close();
+            EventBus.getDefault().post(apk);
         } catch (IOException e) {
         } finally {
         }

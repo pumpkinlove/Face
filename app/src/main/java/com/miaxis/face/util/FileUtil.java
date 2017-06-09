@@ -4,7 +4,10 @@ import android.app.smdt.SmdtManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Environment;
+import android.os.StatFs;
 import android.util.Log;
+
+import com.miaxis.face.constant.Constants;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -121,6 +124,15 @@ public class FileUtil {
         }
     }
 
+    public static int getAvailablePathType(Context context) {
+        File saveDir = new File(new SmdtManager(context).smdtGetSDcardPath(context));
+        if (!saveDir.exists() || !saveDir.canWrite()) {
+            return Constants.PATH_LOCAL;
+        } else {
+            return Constants.PATH_TFCARD;
+        }
+    }
+
     public static String getAvailableImgPath(Context context) {
         return getAvailablePath(context) + File.separator + IMG_PATH_NAME;
     }
@@ -171,5 +183,32 @@ public class FileUtil {
                 }
             }
         }
+    }
+
+    public static long getSDFreeSize(String path) {
+        File file = new File(path);
+        //取得SD卡文件路径
+        StatFs sf = new StatFs(file.getPath());
+        //获取单个数据块的大小(Byte)
+        long blockSize = sf.getBlockSize();
+        //空闲的数据块的数量
+        long freeBlocks = sf.getAvailableBlocks();
+        //返回SD卡空闲大小
+        //return freeBlocks * blockSize;  //单位Byte
+        //return (freeBlocks * blockSize)/1024;   //单位KB
+        return (freeBlocks * blockSize)/1024 /1024; //单位MB
+    }
+
+    public static long getSDAllSize(String path) {
+        File file = new File(path);
+        StatFs sf = new StatFs(file.getPath());
+        //获取单个数据块的大小(Byte)
+        long blockSize = sf.getBlockSize();
+        //获取所有数据块数
+        long allBlocks = sf.getBlockCount();
+        //返回SD卡大小
+        //return allBlocks * blockSize; //单位Byte
+        //return (allBlocks * blockSize)/1024; //单位KB
+        return (allBlocks * blockSize)/1024/1024; //单位MB
     }
 }

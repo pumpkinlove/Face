@@ -38,7 +38,8 @@
 
     <EditText
         android:gravity="center"
-        android:layout_margin="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         android:visibility="gone"
         android:id="@+id/et_pwd"
         android:maxLength="6"
@@ -50,7 +51,8 @@
         android:layout_height="match_parent" />
 
     <Button
-        android:layout_margin="10dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         android:visibility="gone"
         android:id="@+id/btn_confirm"
         android:text="确定"
@@ -60,7 +62,8 @@
         android:layout_height="match_parent" />
 
     <Button
-        android:layout_margin="10dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         android:visibility="gone"
         android:id="@+id/btn_cancel"
         android:text="取消"

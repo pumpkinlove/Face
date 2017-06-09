@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.miaxis.face.R;
 import com.miaxis.face.bean.Record;
+import com.miaxis.face.util.DateUtil;
 
 import java.util.List;
 import java.util.zip.Inflater;
@@ -26,8 +27,7 @@ public class RecordAdapter extends BaseAdapter {
     private List<Record> recordList;
     private Context context;
 
-    public RecordAdapter(List<Record> recordList, Context context) {
-        this.recordList = recordList;
+    public RecordAdapter(Context context) {
         this.context = context;
     }
 
@@ -37,11 +37,17 @@ public class RecordAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
+        if (recordList == null) {
+            return 0;
+        }
         return recordList.size();
     }
 
     @Override
     public Record getItem(int i) {
+        if (recordList == null) {
+            return null;
+        }
         return recordList.get(i);
     }
 
@@ -65,7 +71,7 @@ public class RecordAdapter extends BaseAdapter {
         holder.tvCardNo.setText(record.getCardNo());
         holder.tvOrg.setText(record.getBusEntity());
         holder.tvResult.setText(record.getStatus());
-        holder.tvOpdate.setText(record.getCreateDate());
+        holder.tvOpdate.setText(DateUtil.toAll(record.getCreateDate()));
 
         return convertView;
     }

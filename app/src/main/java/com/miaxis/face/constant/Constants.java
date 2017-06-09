@@ -71,4 +71,7 @@ public class Constants {
     public static final int PRIORITY = 1, LOOP = 0;
     public static final float SOUND_RATE = 1.0f;//正常速率
 
+    public static final int PATH_TFCARD = 0;
+    public static final int PATH_LOCAL = 1;
+
 }

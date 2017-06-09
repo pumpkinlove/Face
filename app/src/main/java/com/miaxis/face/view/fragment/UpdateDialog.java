@@ -132,63 +132,17 @@ public class UpdateDialog extends BaseDialogFragment {
         pbUpdate.setVisibility(View.VISIBLE);
         udContent.setText("正在下载...");
         llUdBottom.setVisibility(View.GONE);
+        setCancelable(false);
+//        DownVersionService.startActionFoo(getActivity());
+        final String filepath = Environment.getExternalStorageDirectory().getPath()+"/ " + getResources().getString(R.string.app_name) + "_" + lastVersion.getVersion()+".apk";
+        final String url = "http://"+ config.getIp() + ":" + config.getPort() + "/" + Constants.PROJECT_NAME + "/" + Constants.DOWN_VERSION;
         new Thread(new Runnable() {
             @Override
             public void run() {
-                handleActionFoo();
+                File f = HttpConnUtils.downFile(filepath, pbUpdate, url);
+                EventBus.getDefault().post(f);
             }
         }).start();
-    }
-
-    private void handleActionFoo() {
-        Config config = Face_App.getConfig();
-        ExecutorService executorService = Executors.newFixedThreadPool(1);
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://" + config.getIp() + ":" + config.getPort() + "/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .callbackExecutor(executorService)
-                .build();
-        UpdateVersion uv = retrofit.create(UpdateVersion.class);
-        String url = "http://"+ config.getIp() + ":" + config.getPort() + "/" + Constants.PROJECT_NAME + "/" + Constants.DOWN_VERSION;
-        Call<ResponseBody> call = uv.downVersion(url);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                writeResponseBodyToDisk(response.body());
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-            }
-        });
-    }
-
-    private void writeResponseBodyToDisk(ResponseBody body) {
-        File apk = new File(FileUtil.FACE_MAIN_PATH, getResources().getString(R.string.app_name) + ".apk");
-        try {
-            InputStream is = body.byteStream();
-            long totalLength = body.contentLength();
-            pbUpdate.setMax(2753607);
-            FileOutputStream fos = new FileOutputStream(apk);
-            BufferedInputStream bis = new BufferedInputStream(is);
-            byte[] buffer = new byte[1024];
-            int cur = 0;
-            int len;
-            while ((len = bis.read(buffer)) != -1) {
-                fos.write(buffer, 0, len);
-                cur += len;
-                Log.e(cur + "", totalLength + "");
-                pbUpdate.setProgress(cur);
-            }
-            fos.flush();
-            fos.close();
-            bis.close();
-            is.close();
-            EventBus.getDefault().post(apk);
-        } catch (IOException e) {
-        } finally {
-        }
     }
 
     protected void installApk(File file) {

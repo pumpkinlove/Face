@@ -84,7 +84,6 @@ import static com.miaxis.face.constant.Constants.LEFT_VOLUME;
 import static com.miaxis.face.constant.Constants.LOOP;
 import static com.miaxis.face.constant.Constants.MAX_FACE_NUM;
 import static com.miaxis.face.constant.Constants.NO_CARD;
-import static com.miaxis.face.constant.Constants.PASS_SCORE;
 import static com.miaxis.face.constant.Constants.PHOTO_SIZE;
 import static com.miaxis.face.constant.Constants.PIC_HEIGHT;
 import static com.miaxis.face.constant.Constants.PIC_WIDTH;
@@ -513,7 +512,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             if (curFaceFeature != null && matchFlag) {
                 float[] fScore = new float[1];
                 int re = mxFaceAPI.mxFeatureMatch(idFaceFeature, curFaceFeature, fScore);
-                if (re == 0 && fScore[0] >= PASS_SCORE) {
+                if (re == 0 && fScore[0] >= config.getPassScore()) {
                     mRecord.setFaceImg(MyUtil.getYUVBase64(curCameraImg, mCamera.getParameters().getPreviewFormat()));
                     eventBus.post(new ResultEvent(ResultEvent.FACE_SUCCESS, mRecord, pFaceBuffer[0]));
                     Log.e("MatchRunnable___", "验证通过 " + re + " _" + fScore[0]);
@@ -708,7 +707,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         if (curFaceFeature != null) {
             float[] fScore = new float[1];
             re = mxFaceAPI.mxFeatureMatch(idFaceFeature, curFaceFeature, fScore);
-            if (re == 0 && fScore[0] >= PASS_SCORE) {
+            if (re == 0 && fScore[0] >= config.getPassScore()) {
                 at2 = System.currentTimeMillis();
                 Log.e("------", "" + (at2 - at1));
                 Log.e("预读___", "验证通过 " + re + " _" + fScore[0]);
@@ -746,7 +745,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             default:
                 return;
         }
-        record.setCreateDate(DateUtil.toAll(new Date()));
+        record.setCreateDate(new Date());
         record.setDevsn(MyUtil.getSerialNumber());
         record.setBusEntity(config.getOrgName());
         record.setLocation(location);
@@ -836,7 +835,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
     private long firstTime = 0;
 
     @OnClick(R.id.tv_title)
-    void onTitleClick(View view) {
+    void onTitleClick() {
         long secondTime = System.currentTimeMillis();
         if ((secondTime - firstTime) > 1500) {
             mState = 0;
@@ -881,7 +880,6 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
             } else if (toType == 1) {
                 startActivity(new Intent(this, RecordActivity.class));
             }
-
         } else {
             Toast.makeText(this, "密码错误", Toast.LENGTH_SHORT).show();
             etPwd.setText(null);

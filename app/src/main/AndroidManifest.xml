@@ -64,8 +64,9 @@
         <activity
             android:name=".view.activity.SettingActivity"
             android:windowSoftInputMode="adjustResize|stateHidden" />
-        <activity android:name=".view.activity.MainActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden"/>
+        <activity
+            android:name=".view.activity.MainActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity android:name=".view.activity.TestActivity" />
 
         <service
@@ -88,7 +89,13 @@
             android:name=".service.DownVersionService"
             android:exported="false" />
 
-        <activity android:name=".view.activity.RecordActivity"></activity>
+        <activity
+            android:name=".view.activity.RecordActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+
+        <service
+            android:name=".service.ClearService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

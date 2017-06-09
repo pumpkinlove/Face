@@ -5,6 +5,7 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Generated;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by Administrator on 2017/5/17 0017.
@@ -31,16 +32,16 @@ public class Record implements Serializable {
     private String location;
     private String longitude;
     private String latitude;
-    private String createDate;
+    private Date createDate;
     private String devsn;
     private String cardId;
     private boolean hasUp;
 
-    @Generated(hash = 1506650803)
+    @Generated(hash = 104027448)
     public Record(Long id, String name, String cardNo, String sex, String birthday,
             String address, String busEntity, String status, String cardImg,
             String faceImg, String finger0, String finger1, String printFinger,
-            String location, String longitude, String latitude, String createDate,
+            String location, String longitude, String latitude, Date createDate,
             String devsn, String cardId, boolean hasUp) {
         this.id = id;
         this.name = name;
@@ -196,11 +197,11 @@ public class Record implements Serializable {
         this.latitude = latitude;
     }
 
-    public String getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(String createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
