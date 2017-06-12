@@ -3,6 +3,7 @@ package com.miaxis.face.view.activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -17,6 +18,7 @@ import com.miaxis.face.bean.Record;
 import com.miaxis.face.event.CountRecordEvent;
 import com.miaxis.face.event.SearchDoneEvent;
 import com.miaxis.face.greendao.gen.RecordDao;
+import com.miaxis.face.service.QueryRecordService;
 import com.miaxis.face.util.DateUtil;
 import com.miaxis.face.view.fragment.RecordDialog;
 
@@ -98,7 +100,12 @@ public class RecordActivity extends BaseActivity {
         recordDialog = new RecordDialog();
         pd = new ProgressDialog(this);
         pd.setMessage("正在检索...");
-        initPage();
+        pd.setCancelable(false);
+        pageNumList = new ArrayList<>();
+        pageAdapter = new ArrayAdapter<>(this, R.layout.item_spinner, pageNumList);
+        pageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sPage.setAdapter(pageAdapter);
+        onSearch();
     }
 
     @OnClick(R.id.btn_next)
@@ -124,64 +131,7 @@ public class RecordActivity extends BaseActivity {
 
     @OnClick(R.id.btn_search)
     void onSearch() {
-        builder = fetchBuilder();
-        queryRecordList();
-    }
-
-    private void queryRecordList() {
-        pd.show();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                totalCount = builder.count();
-                totalPage = (totalCount % PAGE_SIZE == 0) ? totalCount / PAGE_SIZE : (totalCount / PAGE_SIZE + 1);
-                EventBus.getDefault().post(new CountRecordEvent());
-                recordList = builder.offset((curPage - 1) * PAGE_SIZE).limit(PAGE_SIZE).orderDesc(RecordDao.Properties.Id).list();
-                EventBus.getDefault().post(new SearchDoneEvent());
-            }
-        }).start();
-    }
-
-    private void initPage() {
-        pd.show();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                builder = fetchBuilder();
-                totalCount = builder.count();
-                totalPage = (totalCount % PAGE_SIZE == 0) ? totalCount / PAGE_SIZE : (totalCount / PAGE_SIZE + 1);
-                EventBus.getDefault().post(new CountRecordEvent());
-            }
-        }).start();
-
-    }
-
-    private QueryBuilder<Record> fetchBuilder() {
-        QueryBuilder<Record> builder = recordDao.queryBuilder();
-        if ("男".equals(searchSex) || "女".equals(searchSex)) {
-            builder.where(RecordDao.Properties.Sex.eq(searchSex));
-        }
-        if ("成功".equals(searchResult)) {
-            builder.whereOr(RecordDao.Properties.Status.eq("人脸通过"), RecordDao.Properties.Sex.eq("指纹通过"));
-        } else if ("失败".equals(searchResult)) {
-            builder.where(RecordDao.Properties.Status.eq("失败"));
-        }
-        if (tvFromTime.getText().length() > 0) {
-            try {
-                builder.where(RecordDao.Properties.CreateDate.ge(DateUtil.fromMonthDay(tvFromTime.getText().toString())));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-        if (tvToTime.getText().length() > 0) {
-            try {
-                Date searchToDate = DateUtil.fromMonthDay(tvToTime.getText().toString());
-                builder.where(RecordDao.Properties.CreateDate.le(DateUtil.addOneDay(searchToDate)));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-        return builder;
+        QueryRecordService.startActionQuery(this, curPage, tvFromTime.getText().toString(), tvToTime.getText().toString(), searchSex, searchResult);
     }
 
     @Override
@@ -211,8 +161,9 @@ public class RecordActivity extends BaseActivity {
 
     @OnItemSelected(R.id.s_page)
     void onPageSelected(int position) {
+        Log.e("onPageSelected", "----------");
         curPage = pageNumList.get(position);
-        queryRecordList();
+        QueryRecordService.startActionQuery(this, curPage, tvFromTime.getText().toString(), tvToTime.getText().toString(), searchSex, searchResult);
     }
 
     @OnClick(R.id.tv_from_time)
@@ -257,33 +208,21 @@ public class RecordActivity extends BaseActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSearchDoneEvent(SearchDoneEvent e) {
-        adapter.setRecordList(recordList);
-        adapter.notifyDataSetChanged();
-        tvTotal.setText("共" + totalPage + "页 " + totalCount + " 条");
-
+        Log.e("onSearchDoneEvent", "----------");
         pd.dismiss();
-    }
-
-    private void setPageAdapter() {
-        pageNumList = new ArrayList<>();
-        for (int i = 1; i <= totalPage; i ++) {
-            pageNumList.add(i);
-        }
-
-        pageAdapter = new ArrayAdapter<>(this, R.layout.item_spinner, pageNumList);
-        pageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        sPage.setAdapter(pageAdapter);
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onCountRecordEvent(CountRecordEvent e) {
+        totalCount = e.getTotalCount();
+        totalPage = e.getTotalPageNum();
         pageNumList.clear();
-        for (int i = 1; i <= totalPage; i ++) {
+
+        for (int i=1; i<=totalPage; i++) {
             pageNumList.add(i);
         }
         pageAdapter.notifyDataSetChanged();
-        setPageAdapter();
-    }
 
+        tvTotal.setText("共" + totalPage + "页 " + totalCount + "条");
+        recordList = e.getRecordList();
+        adapter.setRecordList(recordList);
+        adapter.notifyDataSetChanged();
+    }
 
 }

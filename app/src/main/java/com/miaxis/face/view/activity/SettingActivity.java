@@ -235,10 +235,10 @@ public class SettingActivity extends BaseActivity {
                 Record r1 = dao.load(1L);
                 if (r1 != null) {
                     List<Record> recordList = new ArrayList<>();
-                    for (int i=0; i< 5000; i++) {
+                    for (int i=0; i< 10000; i++) {
                         Record r = new Record();
-//                        r.setFaceImg(r1.getFaceImg());
-//                        r.setCardImg(r1.getCardImg());
+                        r.setFaceImg(r1.getFaceImg());
+                        r.setCardImg(r1.getCardImg());
                         r.setName("测试数据");
                         r.setCardNo(r1.getCardNo());
                         r.setStatus(r1.getStatus());

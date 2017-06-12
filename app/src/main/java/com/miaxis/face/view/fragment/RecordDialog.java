@@ -117,13 +117,15 @@ public class RecordDialog extends BaseDialogFragment {
             tvHasUp.setTextColor(red);
         }
         if (null != record.getCardImg() && record.getCardImg().length() > 0) {
-            byte[] idData = Base64.decode(record.getCardImg(), Base64.DEFAULT);
-            Bitmap bmpId = BitmapFactory.decodeByteArray(idData, 0, idData.length);
+//            byte[] idData = Base64.decode(record.getCardImg(), Base64.DEFAULT);
+//            Bitmap bmpId = BitmapFactory.decodeByteArray(idData, 0, idData.length);
+            Bitmap bmpId = BitmapFactory.decodeFile(record.getCardImg());
             ivIdPhoto.setImageBitmap(bmpId);
         }
         if (null != record.getFaceImg() && record.getFaceImg().length() > 0) {
-            byte[] cameraData = Base64.decode(record.getFaceImg(), Base64.DEFAULT);
-            Bitmap bmpCamera = BitmapFactory.decodeByteArray(cameraData, 0, cameraData.length);
+//            byte[] cameraData = Base64.decode(record.getFaceImg(), Base64.DEFAULT);
+//            Bitmap bmpCamera = BitmapFactory.decodeByteArray(cameraData, 0, cameraData.length);
+            Bitmap bmpCamera = BitmapFactory.decodeFile(record.getFaceImg());
             ivCameraPhoto.setImageBitmap(bmpCamera);
         }
 

@@ -751,6 +751,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
         record.setLocation(location);
         record.setLatitude(latitude + "");
         record.setLongitude(longitude + "");
+        FileUtil.saveRecordImg(record, this);
         recordDao.insert(record);
         if (config.isNetFlag()) {
             UpLoadRecordService.startActionFoo(this, record, config);

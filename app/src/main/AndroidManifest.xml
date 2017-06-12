@@ -95,6 +95,9 @@
 
         <service
             android:name=".service.ClearService"
+            android:exported="false" />
+        <service
+            android:name=".service.QueryRecordService"
             android:exported="false"></service>
     </application>
 

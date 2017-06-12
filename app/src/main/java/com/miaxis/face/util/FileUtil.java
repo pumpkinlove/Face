@@ -5,8 +5,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Environment;
 import android.os.StatFs;
+import android.util.Base64;
 import android.util.Log;
 
+import com.miaxis.face.bean.Record;
 import com.miaxis.face.constant.Constants;
 
 import java.io.BufferedOutputStream;
@@ -211,4 +213,60 @@ public class FileUtil {
         //return (allBlocks * blockSize)/1024; //单位KB
         return (allBlocks * blockSize)/1024/1024; //单位MB
     }
+
+    public static void deleteImg(String path) {
+        File f = new File(path);
+        if (!f.delete()) {
+            LogUtil.writeLog("删除失败" + path);
+        }
+    }
+
+    public static void saveRecordImg(Record record, Context context) {
+        File cardImg = new File(getAvailableImgPath(context), "id_" + record.getCardNo() + "_" + record.getName() + ".jpg");
+
+        if (cardImg.exists()) {
+            cardImg.delete();
+        }
+
+        byte[] cardImgBytes = Base64.decode(record.getCardImg(), Base64.DEFAULT);
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(cardImg);
+            fos.write(cardImgBytes);
+            fos.flush();
+            record.setCardImg(cardImg.getPath());
+        } catch (IOException e) {
+            LogUtil.writeLog("saveRecordImg" + e.getMessage());
+        } finally {
+            try {
+                if (fos != null)
+                    fos.close();
+            } catch (IOException e) {
+                LogUtil.writeLog("saveRecordImg" + e.getMessage());
+            }
+        }
+
+        File faceImg = new File(getAvailableImgPath(context), record.getCardNo() + "_" + record.getName() + "_" + System.currentTimeMillis() + ".jpg");
+        if (faceImg.exists()) {
+            faceImg.delete();
+        }
+        byte[] faceImgBytes = Base64.decode(record.getFaceImg(), Base64.DEFAULT);
+        FileOutputStream fos2 = null;
+        try {
+            fos2 = new FileOutputStream(faceImg);
+            fos2.write(faceImgBytes);
+            fos2.flush();
+            record.setFaceImg(faceImg.getPath());
+        } catch (IOException e) {
+            LogUtil.writeLog("saveRecordImg" + e.getMessage());
+        } finally {
+            try {
+                if (fos2 != null)
+                    fos2.close();
+            } catch (IOException e) {
+                LogUtil.writeLog("saveRecordImg" + e.getMessage());
+            }
+        }
+    }
+
 }

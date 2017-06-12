@@ -18,12 +18,6 @@ public class HttpUtils {
     }  
   
   
-    /** 
-     * ????Get????
-     *
-     * @param urlStr
-     * @param callBack
-     */
     public static void doGetAsyn(final String urlStr, final CallBack callBack)
     {
         new Thread()
@@ -46,13 +40,6 @@ public class HttpUtils {
         }.start();
     }
 
-    /**
-     * ????Post????
-     * @param urlStr
-     * @param params
-     * @param callBack
-     * @throws Exception
-     */
     public static void doPostAsyn(final String urlStr, final String params,
                                   final CallBack callBack) throws Exception
     {
@@ -77,13 +64,6 @@ public class HttpUtils {
 
     }
 
-    /**
-     * Get?????¡Â???????
-     *
-     * @param urlStr
-     * @return
-     * @throws Exception
-     */
     public static String doGet(String urlStr)
     {
         URL url = null;
@@ -143,16 +123,6 @@ public class HttpUtils {
 
     }
 
-    /**
-     * ????? URL ????POST??????????
-     *
-     * @param url
-     *            ????????? URL
-     * @param param
-     *            ????????????????????? name1=value1&name2=value2 ???????
-     * @return ????????????????????
-     * @throws Exception
-     */
     public static String doPost(String url, String param)
     {
         PrintWriter out = null;
@@ -161,10 +131,8 @@ public class HttpUtils {
         try
         {
             URL realUrl = new URL(url);
-            // ???URL????????
             HttpURLConnection conn = (HttpURLConnection) realUrl
                     .openConnection();
-            // ????????????????
             conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("connection", "Keep-Alive");
             conn.setRequestMethod("POST");
@@ -172,7 +140,6 @@ public class HttpUtils {
                     "application/x-www-form-urlencoded");
             conn.setRequestProperty("charset", "utf-8");
             conn.setUseCaches(false);
-            // ????POST???????????????????
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.setReadTimeout(TIMEOUT_IN_MILLIONS);
@@ -180,14 +147,10 @@ public class HttpUtils {
 
             if (param != null && !param.trim().equals(""))
             {
-                // ???URLConnection?????????????
                 out = new PrintWriter(conn.getOutputStream());
-                // ???????????
                 out.print(param);
-                // flush??????????
                 out.flush();
             }
-            // ????BufferedReader???????????URL?????
             in = new BufferedReader(
                     new InputStreamReader(conn.getInputStream()));
             String line;
@@ -199,8 +162,7 @@ public class HttpUtils {
         {
             e.printStackTrace();
         }
-        // ???finally????????????????????
-        finally  
+        finally
         {  
             try  
             {  
