@@ -5,4 +5,31 @@ package com.miaxis.face.event;
  */
 
 public class CountRecordEvent {
+
+    private long notUpCount;
+    private long count;
+
+    public CountRecordEvent() {
+    }
+
+    public CountRecordEvent(long notUpCount, long count) {
+        this.notUpCount = notUpCount;
+        this.count = count;
+    }
+
+    public long getNotUpCount() {
+        return notUpCount;
+    }
+
+    public void setNotUpCount(long notUpCount) {
+        this.notUpCount = notUpCount;
+    }
+
+    public long getCount() {
+        return count;
+    }
+
+    public void setCount(long count) {
+        this.count = count;
+    }
 }

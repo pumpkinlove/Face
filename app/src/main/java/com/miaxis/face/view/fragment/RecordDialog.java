@@ -116,12 +116,17 @@ public class RecordDialog extends BaseDialogFragment {
             tvHasUp.setText("未上传");
             tvHasUp.setTextColor(red);
         }
-        byte[] idData = Base64.decode(record.getCardImg(), Base64.DEFAULT);
-        Bitmap bmpId = BitmapFactory.decodeByteArray(idData, 0, idData.length);
-        ivIdPhoto.setImageBitmap(bmpId);
-        byte[] cameraData = Base64.decode(record.getFaceImg(), Base64.DEFAULT);
-        Bitmap bmpCamera = BitmapFactory.decodeByteArray(cameraData, 0, cameraData.length);
-        ivCameraPhoto.setImageBitmap(bmpCamera);
+        if (null != record.getCardImg() && record.getCardImg().length() > 0) {
+            byte[] idData = Base64.decode(record.getCardImg(), Base64.DEFAULT);
+            Bitmap bmpId = BitmapFactory.decodeByteArray(idData, 0, idData.length);
+            ivIdPhoto.setImageBitmap(bmpId);
+        }
+        if (null != record.getFaceImg() && record.getFaceImg().length() > 0) {
+            byte[] cameraData = Base64.decode(record.getFaceImg(), Base64.DEFAULT);
+            Bitmap bmpCamera = BitmapFactory.decodeByteArray(cameraData, 0, cameraData.length);
+            ivCameraPhoto.setImageBitmap(bmpCamera);
+        }
+
         tvLocation.setText(record.getLocation());
         tvAddress.setText(record.getAddress());
         tvBirthday.setText(record.getBirthday());

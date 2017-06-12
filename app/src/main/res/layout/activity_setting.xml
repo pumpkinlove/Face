@@ -584,6 +584,7 @@
                         android:textSize="24sp"
                         android:gravity="center"
                         android:clickable="true"
+                        android:hint="正在计算..."
                         android:id="@+id/tv_result_count"
                         android:layout_weight="1"
                         android:layout_width="0dp"

@@ -3,6 +3,7 @@ package com.miaxis.face.bean;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Index;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,6 +17,7 @@ public class Record implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id(autoincrement = true)
+    @Index(name = "idx_id")
     private Long id;
     private String name;
     private String cardNo;

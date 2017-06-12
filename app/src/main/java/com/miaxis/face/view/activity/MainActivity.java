@@ -800,7 +800,7 @@ public class MainActivity extends BaseActivity implements SurfaceHolder.Callback
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LogUtil.writeLog("修复视频卡顿线程" + e.getMessage());
             }
         }
     }

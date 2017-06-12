@@ -85,7 +85,7 @@
             android:id="@+id/tv_to_time"
             style="@style/record_item"
             android:textColorHint="@color/gray_light"
-            android:hint="起始时间"
+            android:hint="截止时间"
             android:layout_weight="1.25"
             android:layout_width="0dp"
             android:layout_height="match_parent" />

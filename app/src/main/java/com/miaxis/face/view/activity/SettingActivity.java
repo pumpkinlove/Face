@@ -19,7 +19,7 @@ import com.miaxis.face.bean.AjaxResponse;
 import com.miaxis.face.bean.Config;
 import com.miaxis.face.bean.Record;
 import com.miaxis.face.bean.Version;
-import com.miaxis.face.constant.Constants;
+import com.miaxis.face.event.CountRecordEvent;
 import com.miaxis.face.event.TimerResetEvent;
 import com.miaxis.face.greendao.gen.ConfigDao;
 import com.miaxis.face.greendao.gen.RecordDao;
@@ -28,9 +28,11 @@ import com.miaxis.face.util.MyUtil;
 import com.miaxis.face.view.fragment.UpdateDialog;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -101,6 +103,7 @@ public class SettingActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
         ButterKnife.bind(this);
+        EventBus.getDefault().register(this);
         initWindow();
         config = Face_App.getConfig();
         initView();
@@ -130,11 +133,22 @@ public class SettingActivity extends BaseActivity {
         } else {
             rbNetOff.setChecked(true);
         }
-        RecordDao recordDao = Face_App.getRecordDao();
-        long notUpCount = recordDao.queryBuilder().where(RecordDao.Properties.HasUp.eq(false)).count();
-        long count = recordDao.count();
-        tvResultCount.setText(notUpCount + " / " + count);
+//        RecordDao recordDao = Face_App.getRecordDao();
         etPwd.setText(config.getPassword());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                RecordDao recordDao = Face_App.getRecordDao();
+                long t1 = System.currentTimeMillis();
+                long notUpCount = recordDao.queryBuilder().where(RecordDao.Properties.HasUp.eq(false)).count();
+                long t2 = System.currentTimeMillis();
+                long count = recordDao.count();
+                long t3 = System.currentTimeMillis();
+                Log.e("==count", "耗时" + (t2 - t1) + " _ " + (t3 - t2));
+                EventBus.getDefault().post(new CountRecordEvent(notUpCount, count));
+
+            }
+        }).start();
 
         updateDialog = new UpdateDialog();
         updateDialog.setContext(this);
@@ -213,6 +227,33 @@ public class SettingActivity extends BaseActivity {
     }
 
     @OnClick(R.id.btn_update)
+    void test() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                RecordDao dao = Face_App.getRecordDao();
+                Record r1 = dao.load(1L);
+                if (r1 != null) {
+                    List<Record> recordList = new ArrayList<>();
+                    for (int i=0; i< 5000; i++) {
+                        Record r = new Record();
+//                        r.setFaceImg(r1.getFaceImg());
+//                        r.setCardImg(r1.getCardImg());
+                        r.setName("测试数据");
+                        r.setCardNo(r1.getCardNo());
+                        r.setStatus(r1.getStatus());
+                        r.setCreateDate(new Date());
+                        r.setSex(r1.getSex());
+                        recordList.add(r);
+                    }
+                    dao.insertInTx(recordList);
+                    Log.e("=测试数据=", "==1000条完成==");
+                }
+            }
+        }).start();
+    }
+
+//    @OnClick(R.id.btn_update)
     void update() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://" + config.getIp() + ":" + config.getPort() + "/")
@@ -259,4 +300,14 @@ public class SettingActivity extends BaseActivity {
         throw new RuntimeException();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onCountRecordEvent(CountRecordEvent e) {
+        tvResultCount.setText(e.getNotUpCount() + " / " + e.getCount());
+    }
+
+    @Override
+    protected void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
+    }
 }

@@ -79,6 +79,8 @@
         android:textColor="@color/white"
         android:layout_weight="3"
         android:layout_width="0dp"
+        android:maxLength="26"
+        android:singleLine="true"
         android:layout_height="match_parent" />
 
     <LinearLayout

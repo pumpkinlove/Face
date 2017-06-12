@@ -60,12 +60,12 @@ public class Face_App extends Application {
         super.onCreate();
 
         initData();
-        initCW();
         initDbHelp();
         initConfig();
         smdtManager.smdtSetExtrnalGpioValue(2, true);
         startTask();
-
+        initCW();
+        ClearService.startActionClear(getApplicationContext());
     }
 
     void initData() {
@@ -193,10 +193,6 @@ public class Face_App extends Application {
 
     }
 
-    private void clearData() {
-
-    }
-
     private void startTask() {
         initTask();
         Date start = new Date();
@@ -218,12 +214,10 @@ public class Face_App extends Application {
                 if (config.isNetFlag()) {
                     upLoad();
                 }
-                ClearService.startActionClear(getApplicationContext());
             }
         };
     }
 
-    @SuppressWarnings("deprecation")
     public void reSetTimer() {
         timerTask.cancel();
         initTask();

@@ -99,7 +99,6 @@ public class RecordActivity extends BaseActivity {
         pd = new ProgressDialog(this);
         pd.setMessage("正在检索...");
         initPage();
-
     }
 
     @OnClick(R.id.btn_next)
@@ -144,10 +143,17 @@ public class RecordActivity extends BaseActivity {
     }
 
     private void initPage() {
-        builder = fetchBuilder();
-        totalCount = builder.count();
-        totalPage = (totalCount % PAGE_SIZE == 0) ? totalCount / PAGE_SIZE : (totalCount / PAGE_SIZE + 1);
-        setPageAdapter();
+        pd.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                builder = fetchBuilder();
+                totalCount = builder.count();
+                totalPage = (totalCount % PAGE_SIZE == 0) ? totalCount / PAGE_SIZE : (totalCount / PAGE_SIZE + 1);
+                EventBus.getDefault().post(new CountRecordEvent());
+            }
+        }).start();
+
     }
 
     private QueryBuilder<Record> fetchBuilder() {
@@ -180,14 +186,17 @@ public class RecordActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
 
     @OnItemClick(R.id.lv_record)
     void onRecordClicked(int position) {
-        Record re = recordList.get(position);
-        recordDialog.setRecord(re);
-        recordDialog.show(getFragmentManager(), "RECORD_DIALOG");
+        if (!recordDialog.isAdded()) {
+            Record re = recordList.get(position);
+            recordDialog.setRecord(re);
+            recordDialog.show(getFragmentManager(), "RECORD_DIALOG");
+        }
     }
 
     @OnItemSelected(R.id.s_sex)
@@ -273,11 +282,8 @@ public class RecordActivity extends BaseActivity {
             pageNumList.add(i);
         }
         pageAdapter.notifyDataSetChanged();
+        setPageAdapter();
     }
 
-    @Override
-    public boolean isDestroyed() {
-        EventBus.getDefault().unregister(this);
-        return super.isDestroyed();
-    }
+
 }
