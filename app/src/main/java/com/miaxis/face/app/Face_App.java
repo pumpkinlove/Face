@@ -183,14 +183,14 @@ public class Face_App extends Application {
         long page = (count % GROUP_SIZE == 0) ? count / GROUP_SIZE : (count / GROUP_SIZE + 1);
         for (int i = 0; i < page; i ++) {
             List<Record> recordList = recordDao.queryBuilder().offset(i * GROUP_SIZE).limit(GROUP_SIZE).orderAsc(RecordDao.Properties.Id).list();
-            for (Record record : recordList) {
+            for (int j=0; j<recordList.size(); j++) {
+                Record record = recordList.get(j);
                 if (!record.isHasUp()) {
                     Log.e("UpLoad", "===========  " + record.getName());
                     UpLoadRecordService.startActionFoo(getApplicationContext(), record, config);
                 }
             }
         }
-
     }
 
     private void startTask() {
@@ -214,6 +214,7 @@ public class Face_App extends Application {
                 if (config.isNetFlag()) {
                     upLoad();
                 }
+                ClearService.startActionClear(getApplicationContext());
             }
         };
     }

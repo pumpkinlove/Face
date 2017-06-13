@@ -3,6 +3,7 @@ package com.miaxis.face.util;
 import android.app.smdt.SmdtManager;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.os.StatFs;
 import android.util.Base64;
@@ -11,10 +12,14 @@ import android.util.Log;
 import com.miaxis.face.bean.Record;
 import com.miaxis.face.constant.Constants;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -85,7 +90,7 @@ public class FileUtil {
         try {
             fos = new FileOutputStream(file);
             byte[] b = new byte[1024];
-            while((is.read(b)) != -1){
+            while ((is.read(b)) != -1) {
                 fos.write(b);
             }
             fos.flush();
@@ -266,6 +271,84 @@ public class FileUtil {
             } catch (IOException e) {
                 LogUtil.writeLog("saveRecordImg" + e.getMessage());
             }
+        }
+    }
+
+    public static String copyImg(Record record) {
+        FileOutputStream fos = null;
+        FileInputStream fis = null;
+        String newPath = record.getFaceImg().replace(record.getName(), "测试数据" + System.currentTimeMillis());
+        try {
+            fis = new FileInputStream(new File(record.getFaceImg()));
+            fos = new FileOutputStream(new File(newPath));
+            byte[] b = new byte[1024];
+            while ((fis.read(b)) != -1) {
+                fos.write(b);
+            }
+            fos.flush();
+        } catch (Exception e) {
+
+        } finally {
+            if (null != fos) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (null != fis) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return newPath;
+        }
+    }
+
+    public static String pathToBase64(String path) {
+        try {
+            byte[] bytes = toByteArray(path);
+            String str = Base64.encodeToString(bytes, Base64.DEFAULT);
+            bytes = null;
+            System.gc();
+            return str;
+        } catch (Exception e) {
+            LogUtil.writeLog("pathToBase64" + e.getMessage());
+            return null;
+        }
+
+    }
+
+    public static byte[] toByteArray(String filename) throws Exception {
+
+        File f = new File(filename);
+        if (!f.exists()) {
+            throw new FileNotFoundException(filename);
+        }
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream((int) f.length());
+        BufferedInputStream in = null;
+        try {
+            in = new BufferedInputStream(new FileInputStream(f));
+            int buf_size = 1024;
+            byte[] buffer = new byte[buf_size];
+            int len = 0;
+            while (-1 != (len = in.read(buffer, 0, buf_size))) {
+                bos.write(buffer, 0, len);
+            }
+            return bos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            try {
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            bos.close();
         }
     }
 

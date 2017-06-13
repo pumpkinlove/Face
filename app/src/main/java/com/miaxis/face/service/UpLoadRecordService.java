@@ -13,6 +13,7 @@ import com.miaxis.face.bean.Record;
 import com.miaxis.face.greendao.gen.RecordDao;
 import com.miaxis.face.net.UpLoadRecord;
 import com.miaxis.face.util.DateUtil;
+import com.miaxis.face.util.FileUtil;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -62,6 +63,8 @@ public class UpLoadRecordService extends IntentService {
     }
 
     private void handleActionUpLoad(final Record record, final Config c) {
+        String cardImg = FileUtil.pathToBase64(record.getCardImg());
+        String faceImg = FileUtil.pathToBase64(record.getFaceImg());
         retrofit = new Retrofit.Builder()
                 .baseUrl("http://" + c.getIp() + ":" + c.getPort() + "/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -77,8 +80,8 @@ public class UpLoadRecordService extends IntentService {
                 record.getAddress(),
                 record.getBusEntity(),
                 record.getStatus(),
-                record.getCardImg(),
-                record.getFaceImg(),
+                cardImg,
+                faceImg,
                 record.getFinger0(),
                 record.getFinger1(),
                 record.getPrintFinger(),

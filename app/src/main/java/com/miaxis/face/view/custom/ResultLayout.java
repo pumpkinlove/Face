@@ -106,7 +106,7 @@ public class ResultLayout extends LinearLayout {
                 gifFinger.setVisibility(VISIBLE);
                 break;
             case ResultEvent.FINGER_SUCCESS:
-                ivResult.setImageResource(R.mipmap.result_true);
+                ivResult.setImageResource(R.mipmap.result_false);
                 tvResult.setText(result_success);
                 tvResult.setVisibility(VISIBLE);
                 gifFinger.setVisibility(GONE);

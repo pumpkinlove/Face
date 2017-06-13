@@ -54,6 +54,9 @@ public class ClearService extends IntentService {
                 if (c <= 0.30d) {
                     RecordDao dao = Face_App.getRecordDao();
                     List<Record> recordList = dao.queryBuilder().offset(0).limit(1000).orderAsc(RecordDao.Properties.Id).list();
+                    for (int i=0; i<recordList.size(); i ++) {
+                        FileUtil.deleteImg(recordList.get(i).getFaceImg());
+                    }
                     dao.deleteInTx(recordList);
                     LogUtil.writeLog("清理记录" + recordList.size() + "条");
                 }
@@ -63,6 +66,9 @@ public class ClearService extends IntentService {
                 long count = dao.count();
                 if (count >= 15000) {
                     List<Record> recordList = dao.queryBuilder().offset(0).limit(1000).orderAsc(RecordDao.Properties.Id).list();
+                    for (int i=0; i<recordList.size(); i ++) {
+                        FileUtil.deleteImg(recordList.get(i).getFaceImg());
+                    }
                     dao.deleteInTx(recordList);
                     LogUtil.writeLog("清理记录" + recordList.size() + "条");
                 }
@@ -70,5 +76,6 @@ public class ClearService extends IntentService {
         }
 
     }
+
 
 }

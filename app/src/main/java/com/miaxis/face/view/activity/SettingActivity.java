@@ -24,6 +24,7 @@ import com.miaxis.face.event.TimerResetEvent;
 import com.miaxis.face.greendao.gen.ConfigDao;
 import com.miaxis.face.greendao.gen.RecordDao;
 import com.miaxis.face.net.UpdateVersion;
+import com.miaxis.face.util.FileUtil;
 import com.miaxis.face.util.MyUtil;
 import com.miaxis.face.view.fragment.UpdateDialog;
 
@@ -133,7 +134,6 @@ public class SettingActivity extends BaseActivity {
         } else {
             rbNetOff.setChecked(true);
         }
-//        RecordDao recordDao = Face_App.getRecordDao();
         etPwd.setText(config.getPassword());
         new Thread(new Runnable() {
             @Override
@@ -226,18 +226,19 @@ public class SettingActivity extends BaseActivity {
         }).start();
     }
 
-    @OnClick(R.id.btn_update)
+//    @OnClick(R.id.btn_update)
     void test() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 RecordDao dao = Face_App.getRecordDao();
-                Record r1 = dao.load(1L);
+                Record r1 = dao.queryBuilder().orderDesc(RecordDao.Properties.Id).limit(1).unique();
                 if (r1 != null) {
                     List<Record> recordList = new ArrayList<>();
-                    for (int i=0; i< 10000; i++) {
+                    for (int i=0; i< 1000; i++) {
+                        Log.e("==造数据===", "====" + i);
                         Record r = new Record();
-                        r.setFaceImg(r1.getFaceImg());
+                        r.setFaceImg(FileUtil.copyImg(r1));
                         r.setCardImg(r1.getCardImg());
                         r.setName("测试数据");
                         r.setCardNo(r1.getCardNo());
@@ -248,12 +249,19 @@ public class SettingActivity extends BaseActivity {
                     }
                     dao.insertInTx(recordList);
                     Log.e("=测试数据=", "==1000条完成==");
+                    long t1 = System.currentTimeMillis();
+                    long notUpCount = dao.queryBuilder().where(RecordDao.Properties.HasUp.eq(false)).count();
+                    long t2 = System.currentTimeMillis();
+                    long count = dao.count();
+                    long t3 = System.currentTimeMillis();
+                    Log.e("==count", "耗时" + (t2 - t1) + " _ " + (t3 - t2));
+                    EventBus.getDefault().post(new CountRecordEvent(notUpCount, count));
                 }
             }
         }).start();
     }
 
-//    @OnClick(R.id.btn_update)
+    @OnClick(R.id.btn_update)
     void update() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://" + config.getIp() + ":" + config.getPort() + "/")
